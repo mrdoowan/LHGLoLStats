@@ -3,19 +3,22 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json.Linq;
 using RiotSharp;
 using RiotSharp.Misc;
 
 namespace LoLStatsAPIv4_GUI {
     public class MasterWrapper {
 
+        #region Private Functions & Consts
+
         private const string SOLO_QUEUE_STRING = "RANKED_SOLO_5x5";
         private const string FLEX_QUEUE_STRING = "RANKED_FLEX_SR";
-        #region Database Tables, Columns, Consts
         // T = Table Name
         // C = Column Name
         private const string T_SUMMONERS = "Summoners";
@@ -23,6 +26,7 @@ namespace LoLStatsAPIv4_GUI {
         private const string T_REGISTEREDPLAYERS = "RegisteredPlayers";
         private const string T_TEAMS = "Teams";
         private const string T_MATCHES = "Matches";
+        private const string T_CHAMPIONS = "Champions";
 
         private const string C_ACCID = "accountID";
         private const string C_SUMID = "summonerID";
@@ -35,86 +39,84 @@ namespace LoLStatsAPIv4_GUI {
         private const string C_TYPE = "type";
         private const string C_COMPNAME = "competitionName";
         private const string C_COMPID = "competitionID";
+        private const string C_REDTEAMID = "redTeamID";
+        private const string C_BLUETEAMID = "blueTeamID";
+        private const string C_LASTUPDATE = "lastUpdated";
+
+        // Cache Storage
+        private static RiotApi apiDev;
+        private static readonly Dictionary<string, int> compDict = new Dictionary<string, int>();     // Acting as a cache
+        private static readonly Dictionary<int, string> champDict = new Dictionary<int, string>();    // Acting as a cache
+
+        // In case Task.Wait() returns an exception, we don't want to Exit
+        private static bool WaitTaskPassException(dynamic task, APIParam type, string param) {
+            bool taskCompleted = false;
+            while (!taskCompleted) {
+                try {
+                    task.Wait();
+                    taskCompleted = true;
+                    LogClass.APICalled(type, param, false);
+                }
+                catch (RiotSharpRateLimitException ex) {
+                    LogClass.APICalled(type, param, true);
+                    LogClass.WriteLogLine("Error " + ex.HttpStatusCode + ". Rate Limit Reached! Wait for " + ex.RetryAfter);
+                    Cursor.Current = Cursors.WaitCursor;
+                    Task.Delay(ex.RetryAfter);
+                    Cursor.Current = Cursors.Default;
+                }
+                catch (Exception ex) {
+                    LogClass.APICalled(type, param, true);
+                    LogClass.WriteLogLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+            return true;
+        }
+
         #endregion
 
-        private readonly DBWrapper DBClass = new DBWrapper();
-        private static RiotApi apiDev;
-        private static Dictionary<string, int> compIDs = new Dictionary<string, int>();
+        #region Public Functions
 
-        // Whenever textbox updates, dev instance
+        // Whenever textbox updates
         public static void UpdateAPIDevInstance(string key) {
             apiDev = RiotApi.GetDevelopmentInstance(key);
         }
 
-        // Input: None
-        // API Output: None
-        // Database: Competitions, getting list of names
-        // APIKey Usage: None
-        // Also updates a local dictionary to reduce calls to Database
-        public static List<string> GetCompetitionNames() {
-            var list = new List<string>() { "" };   // For a blank option in Combobox
-            var objList = DBWrapper.DBReadFromTable(T_COMPETITIONS);
-
-            foreach (var objDict in objList) {
-                string compName = objDict[C_NAME].ToString();
-                int compID = (int)objDict[C_ID];
-                list.Add(compName);
-                compIDs.Add(compName, compID);
-            }
-            return list;
+        // Whenever connection string updates
+        public static void UpdateConnectionString(string connection) {
+            DBWrapper.ConnectionString = connection;
         }
 
-        // Input: None
-        // API Output: None
-        // Database: Match IDs, based on Competition Name
-        // APIKey Usage: None
-        public static List<string> GetMatchIdList(string compName) {
-            string compID = compIDs[compName].ToString();
-
-            var list = new List<string>() { "" };   // This is for Combobox
-            var conds = new Dictionary<string, string>() {
-                { C_COMPID, compID }
+        // DB Table: Teams
+        // Should make it a cache lol
+        public static int GetTeamID(string teamName) {
+            var cond = new Dictionary<string, string>() {
+                { C_NAME, teamName }
             };
-            var objList = DBWrapper.DBReadFromTable(T_MATCHES, conds);
-
-            foreach (var objDict in objList) {
-                list.Add(objDict[C_ID].ToString());
+            var objMap = DBWrapper.DBReadFromTable(T_TEAMS, cond);
+            if (objMap.Count > 0) {
+                return (int)objMap[0][C_ID];
             }
-
-            return list;
+            return 0;
         }
 
-        // Input: None
-        // API Output: None
-        // Database: Team Names, based on Competition Name
-        // APIKey Usage: None
-        public static List<string> GetTeamNames(string compName) {
-            string compID = compIDs[compName].ToString();
-
-            var list = new List<string>();
-            var conds = new Dictionary<string, string>() {
-                { C_COMPID, compID }
-            };
-            var objList = DBWrapper.DBReadFromTable(T_TEAMS, conds);
-
-            foreach (var objDict in objList) {
-                list.Add(objDict[C_NAME].ToString());
-            }
-
-            return list;
+        // Get Champ Name from id
+        public static string GetChampName(int id) {
+            return champDict[id];
         }
 
-        // Input: Summoner Name Rosters based on Competition
+        #region API Calls
+
+        // DB Table: Competitions, Summoners, Registered Players
+        // API Input: Summoner Name Rosters based on Competition
         // API Output: Summoner IDs
-        // Database: Summoner
-        // APIKey Usage: 1 per new Name not in Summoners Table loaded from .txt
-        public static bool LoadSummonerNamesIntoDB(string compName, List<string> compList) {
+        // APIKey Usage: 1 per new Name loaded from .txt
+        public static bool LoadSummonerNamesIntoDB(string compName, string compType, List<string> compList) {
             var summonerMap = new Dictionary<string, Tuple<string, string>>(); // Key: SummonerId -> Values: AccountId, Name
-
             // If new, register the competition
-            var conditions = new Dictionary<string, string>() { 
-                { C_NAME, compName } 
-            };
+            var conditions = new Dictionary<string, string>();
+            conditions.Add(C_NAME, compName);
+            conditions.Add(C_TYPE, compType);
             if (!DBWrapper.DBTableHasEntry(T_COMPETITIONS, conditions)) {
                 if (MessageBox.Show("Do you want to add new competition \"" + compName + "\"?", "New Competition",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) {
@@ -153,9 +155,9 @@ namespace LoLStatsAPIv4_GUI {
                 var summTuple = summonerMap[summID];
                 string accID = summTuple.Item1;
                 string name = summTuple.Item2;
-                
-                conditions = new Dictionary<string, string>() { 
-                    { C_SUMID, summID } 
+
+                conditions = new Dictionary<string, string>() {
+                    { C_SUMID, summID }
                 };
                 if (!DBWrapper.DBTableHasEntry(T_SUMMONERS, conditions)) {
                     // ID does not exist. INSERT new summoner
@@ -175,7 +177,7 @@ namespace LoLStatsAPIv4_GUI {
                     var update = new Dictionary<string, string>() {
                         { C_NAME, name }
                     };
-                    DBWrapper.DBUpdateTable(T_SUMMONERS, conditions, update);
+                    DBWrapper.DBUpdateTable(T_SUMMONERS, conditions, update, Operator.AND);
                 }
 
             }
@@ -183,8 +185,8 @@ namespace LoLStatsAPIv4_GUI {
             foreach (string summID in summonerMap.Keys) {
                 // Now update RegisteredPlayers based on the Competition names
                 int compID = 0;
-                conditions = new Dictionary<string, string>() { 
-                    { C_NAME, compName } 
+                conditions = new Dictionary<string, string>() {
+                    { C_NAME, compName }
                 };
                 var objRead = DBWrapper.DBReadFromTable(T_COMPETITIONS, conditions);
                 if (objRead.Count > 0) {
@@ -195,7 +197,7 @@ namespace LoLStatsAPIv4_GUI {
                     { C_COMPID, compID.ToString() },
                     { C_SUMID, summID }
                 };
-                if (!DBWrapper.DBTableHasEntry(T_REGISTEREDPLAYERS, conditions)) {
+                if (!DBWrapper.DBTableHasEntry(T_REGISTEREDPLAYERS, conditions, Operator.AND)) {
                     DBWrapper.DBInsertIntoTable(T_REGISTEREDPLAYERS, conditions);
                 }
             }
@@ -203,17 +205,16 @@ namespace LoLStatsAPIv4_GUI {
             return true;
         }
 
-        // Input: Summoner IDs (from Table RegisteredPlayers)
-        // API Output: Summoner ranks
-        // Database: Summoner
-        // APIKey Usage: 1 per summoner ID in the selected Competition
+        // DB Table: Registered Players, Summoners, 
+        // API Input: Summoner IDs (from Table RegisteredPlayers)
+        // API Output: Summoner Ranks
+        // APIKey Usage: 1 per Summoner in selected Competition
         public static bool CompetitionUpdateSummonerRanks(string compName) {
             if (compName.Length == 0) { return false; }
 
             var summIdList = new List<string>();
-            var conds = new Dictionary<string, string>() {
-                { C_COMPNAME, compName }
-            };
+            var conds = new Dictionary<string, string>();
+            conds.Add(C_COMPNAME, compName);
             var objMap = DBWrapper.DBReadFromTable(T_REGISTEREDPLAYERS, conds);
             foreach (var row in objMap) {
                 summIdList.Add(row[C_SUMID].ToString());
@@ -224,37 +225,38 @@ namespace LoLStatsAPIv4_GUI {
                 var leagueTask = apiDev.League.GetLeagueEntriesBySummonerAsync(Region.Na, summId);
                 WaitTaskPassException(leagueTask, APIParam.LEAGUES, summId);
                 var leagueObj = leagueTask.Result;
+                var timeNow = DateTime.Now;
 
+                conds = new Dictionary<string, string>();
+                conds.Add(C_SUMID, summId);
+                var set = new Dictionary<string, string>();
+                set.Add(C_LASTUPDATE, timeNow.ToString());
+                string sTier = null, sDiv = null, fTier = null, fDiv = null;
                 foreach (var leagueEntry in leagueObj) {
-                    string tier = null, div = null;
                     string queueType = leagueEntry.QueueType;
-                    if (queueType == SOLO_QUEUE_STRING || queueType == FLEX_QUEUE_STRING) {
-                        tier = leagueEntry.Tier;
-                        div = leagueEntry.Rank;
+                    if (queueType == SOLO_QUEUE_STRING) {
+                        sTier = leagueEntry.Tier;
+                        sDiv = leagueEntry.Rank;
+                        set.Add(C_STIER, sTier);
+                        set.Add(C_SDIV, sDiv);
                     }
-
-                    if (!string.IsNullOrWhiteSpace(tier) && !string.IsNullOrWhiteSpace(div)) {
-                        string colTier = (queueType == SOLO_QUEUE_STRING) ? C_STIER : C_FTIER;
-                        string colDiv = (queueType == SOLO_QUEUE_STRING) ? C_SDIV : C_FDIV;
-                        conds = new Dictionary<string, string>() {
-                            { C_SUMID, summId }
-                        };
-                        var set = new Dictionary<string, string>() {
-                            { colTier, tier },
-                            { colDiv, div }
-                        };
-                        DBWrapper.DBUpdateTable(T_SUMMONERS, conds, set);
+                    else if (queueType == FLEX_QUEUE_STRING) {
+                        fTier = leagueEntry.Tier;
+                        fDiv = leagueEntry.Rank;
+                        set.Add(C_FTIER, fTier);
+                        set.Add(C_FDIV, fDiv);
                     }
                 }
+                DBWrapper.DBUpdateTable(T_SUMMONERS, conds, set);
             }
 
             return true;
         }
 
-        // Input: Match IDs, and Teams
-        // API Output: Every match stat
-        // Database: Matches
-        // APIKey Usage: 2 per matchID
+        // DB Table: Matches, PlayerStats, TeamStats, BannedChamps, Objectives
+        // API Input: Match ID
+        // API Output: Every applicable stat in that match
+        // APIKey Usage: 2
         public static bool LoadMatchStatsIntoDB(string compName, string blueTeamName, string redTeamName, long matchID) {
             int blueTeamID = GetTeamID(blueTeamName);
             int redTeamID = GetTeamID(redTeamName);
@@ -265,45 +267,153 @@ namespace LoLStatsAPIv4_GUI {
             WaitTaskPassException(matchTimelineTask, APIParam.MATCH, matchID.ToString());
             var matchTimelineObj = matchTimelineTask.Result;
 
+            MatchStats match = new MatchStats(compDict[compName]);
+            match.InitializeClass(matchInfoObj, matchTimelineObj);
+
             return true;
         }
 
-        #region Private Helper Functions
+        #endregion
 
-        // In case Task.Wait() returns an exception, we don't want to Exit
-        private static bool WaitTaskPassException(dynamic task, APIParam type, string param) {
-            bool taskCompleted = false;
-            while (!taskCompleted) {
-                try {
-                    task.Wait();
-                    taskCompleted = true;
-                    LogClass.APICalled(type, param, false);
+        #region DB Calls
+
+        // DB Table: Champions
+        public static void LoadChampionJSON(string fileName) {
+            JObject json = JObject.Parse(File.ReadAllText(fileName));
+
+            JObject champData = (JObject)json["data"];
+            foreach (var champObj in champData) {
+                string jsonName = champObj.Value["name"].ToString();
+                string jsonId = champObj.Value["key"].ToString();
+
+                var conds = new Dictionary<string, string>() {
+                    { C_NAME, jsonName }
+                };
+                if (!champDict.ContainsKey(int.Parse(jsonId))) {
+                    var insert = new Dictionary<string, string>() {
+                        { C_NAME, jsonName },
+                        { C_ID, jsonId }
+                    };
+                    DBWrapper.DBInsertIntoTable(T_CHAMPIONS, insert);
                 }
-                catch (Exception ex) {
-                    if (ex.InnerException.Message.Contains("404")) {
-                        LogClass.APICalled(type, param, true);
-                        return false;
-                    }
-                    else {
-                        // Dunno what happens when it's not 404??
-                        Debug.WriteLine("Error with Task: " + ex.Message + "\nRate Limit reached?");
+                else {
+                    string dbName = champDict[int.Parse(jsonId)];
+                    if (jsonName != dbName) {
+                        var update = new Dictionary<string, string>() {
+                            { C_ID, jsonId }
+                        };
+                        DBWrapper.DBUpdateTable(T_CHAMPIONS, conds, update);
                     }
                 }
+                // Yikes this is ugly
             }
-            return true;
         }
 
-        // Get Team ID from name
-        private static int GetTeamID(string teamName) {
-            var cond = new Dictionary<string, string>() {
+        // DB Table: Champions
+        // Cache initializes upon startup
+        public static void InitializeChampDict() {
+            var objList = DBWrapper.DBReadFromTable(T_CHAMPIONS);
+
+            foreach (var objDict in objList) {
+                string champName = objDict[C_NAME].ToString();
+                int champID = (int)objDict[C_ID];
+                champDict.Add(champID, champName);
+            }
+        }
+
+        // DB Table: Competitions
+        // Also updates a local dictionary (or cache) to reduce calls to Database
+        public static List<string> GetCompetitionNames() {
+            var list = new List<string>() { "" };   // For a blank option in Combobox
+            var objList = DBWrapper.DBReadFromTable(T_COMPETITIONS);
+
+            foreach (var objDict in objList) {
+                string compName = objDict[C_NAME].ToString();
+                int compID = (int)objDict[C_ID];
+                list.Add(compName);
+                compDict.Add(compName, compID);
+            }
+            return list;
+        }
+
+        // DB Table: Match IDs, based on Competition Name
+        public static List<string> GetMatchIdList(string compName) {
+            string compID = compDict[compName].ToString();
+
+            var list = new List<string>() { "" };   // This is for Combobox
+            var conds = new Dictionary<string, string>() {
+                { C_COMPID, compID }
+            };
+            var objList = DBWrapper.DBReadFromTable(T_MATCHES, conds);
+
+            foreach (var objDict in objList) {
+                list.Add(objDict[C_ID].ToString());
+            }
+
+            return list;
+        }
+
+        // DB Table: Teams, based on Competition Name
+        public static List<string> GetTeamNames(string compName) {
+            string compID = compDict[compName].ToString();
+
+            var list = new List<string>();
+            var conds = new Dictionary<string, string>() {
+                { C_COMPID, compID }
+            };
+            var objList = DBWrapper.DBReadFromTable(T_TEAMS, conds);
+
+            foreach (var objDict in objList) {
+                list.Add(objDict[C_NAME].ToString());
+            }
+
+            return list;
+        }
+
+        // DB Table: Team Names, based on Competition Name
+        public static bool IsTeamInMatchesTable(string teamName) {
+            int teamID = GetTeamID(teamName);
+
+            var conds = new Dictionary<string, string>() {
+                { C_REDTEAMID, teamID.ToString() },
+                { C_BLUETEAMID, teamID.ToString() }
+            };
+            return DBWrapper.DBTableHasEntry(T_MATCHES, conds, Operator.OR);
+        }
+
+        // DB Table: Teams, Modify based on Team
+        public static void RemoveTeamInTable(string teamName) {
+            var conds = new Dictionary<string, string>() {
                 { C_NAME, teamName }
             };
-            var objMap = DBWrapper.DBReadFromTable(T_TEAMS, cond);
-            if (objMap.Count > 0) {
-                return (int)objMap[0][C_NAME];
-            }
-            return 0;
+            DBWrapper.DBDeleteFromTable(T_TEAMS, conds, Operator.AND);
         }
+
+        // DB Table: Teams, Add new Team
+        public static void AddTeamInTable(string teamName, string compName) {
+            string compID = compDict[compName].ToString();
+
+            var entries = new Dictionary<string, string>() {
+                { C_NAME, teamName },
+                { C_COMPID, compID }
+            };
+
+            DBWrapper.DBInsertIntoTable(T_TEAMS, entries);
+        }
+
+        // DB Table: Update Team Name
+        public static void UpdateTeamNameInTable(string oldName, string newName) {
+            var conds = new Dictionary<string, string>() {
+                { C_NAME, oldName }
+            };
+            var update = new Dictionary<string, string>() {
+                { C_NAME, newName }
+            };
+
+            DBWrapper.DBUpdateTable(T_TEAMS, conds, update);
+        }
+
+        #endregion
 
         #endregion
     }

@@ -1,0 +1,88 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using RiotSharp.Endpoints.MatchEndpoint;
+
+namespace LoLStatsAPIv4_GUI {
+    
+    public class PlayerList {
+
+        private List<Player> UnassignedPlayers;   // Key: Champ Name, Value: Player class
+        private Dictionary<Role, Player> Players;
+
+        // Ctor
+        public PlayerList() {
+            UnassignedPlayers = new List<Player>();
+            Players = new Dictionary<Role, Player>() {
+                { Role.TOP, null },
+                { Role.JUNGLE, null },
+                { Role.MIDDLE, null },
+                { Role.BOTTOM, null },
+                { Role.SUPPORT, null }
+            };
+        }
+
+        private int Count() {
+            return UnassignedPlayers.Count + Players.Count;
+        }
+
+        // Index overload
+        public Player this[Role key] {
+            get => Players[key];
+            set => Players[key] = value;
+        }
+
+        public void AddPlayer(Participant playerObj, ParticipantFrame frameAt15,
+            ParticipantFrame frameAt25, decimal duration) {
+            if (Count() < 5) {
+                var newPlayer = new Player();
+                newPlayer.InitializeClass(playerObj, frameAt15, frameAt25, duration);
+                if (newPlayer.Role == Role.NONE || Players[newPlayer.Role] != null) {
+                    UnassignedPlayers.Add(newPlayer);
+                }
+                else {
+                    Players[newPlayer.Role] = newPlayer;
+                }
+
+                // Put Unassigned Players into their Roles
+                if (Count() == 5) {
+                    int i = 0;
+                    foreach (Role role in Players.Keys) {
+                        if (Players[role] == null) {
+                            Players[role] = UnassignedPlayers[i++];
+                        }
+                    }
+                    // Totally not going out of index :')
+                }
+            }
+        }
+
+        public decimal GetTeamTotalStat(TeamStat type) {
+            decimal val = 0;
+            foreach (var player in Players.Values) {
+                switch (type) {
+                    case TeamStat.KILLS: val += player.Kills; break;
+                    case TeamStat.DEATHS: val += player.Deaths; break;
+                    case TeamStat.ASSISTS: val += player.Assists; break;
+                    case TeamStat.DAMAGE_CHAMPS: val += player.DamageToChamps; break;
+                    case TeamStat.DAMAGE_OBJECTIVES: val += player.DamageToObjectives; break;
+                    case TeamStat.GOLD: val += player.TotalGold; break;
+                    case TeamStat.CREEP_SCORE: val += player.CreepScore; break;
+                    case TeamStat.VISION_SCORE: val += player.VisionScore; break;
+                    case TeamStat.GOLD_AT_15: val += player.CSAt15; break;
+                    case TeamStat.GOLD_DIFF_15: val += player.CSDiff15; break;
+                    case TeamStat.XP_AT_15: val += player.XPAt15; break;
+                    case TeamStat.XP_DIFF_15: val += player.XPDiff15; break;
+                    case TeamStat.GOLD_AT_25: val += player.GoldAt25; break;
+                    case TeamStat.GOLD_DIFF_25: val += player.GoldDiff25; break;
+                    case TeamStat.XP_AT_25: val += player.XPAt25; break;
+                    case TeamStat.XP_DIFF_25: val += player.XPDiff25; break;
+                    default: break;
+                }
+            }
+            return val;
+        }
+    }
+}

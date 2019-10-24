@@ -12,6 +12,7 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,7 +25,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -48,10 +48,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="RiotSharp">
+    <Reference Include="RiotSharp, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>.\RiotSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -70,12 +72,6 @@
   <ItemGroup>
     <Compile Include="Champ.cs" />
     <Compile Include="DBWrapper.cs" />
-    <Compile Include="EditRolesForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="EditRolesForm.Designer.cs">
-      <DependentUpon>EditRolesForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="EditSummonersForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -103,16 +99,15 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MasterWrapper.cs" />
-    <Compile Include="Match.cs" />
+    <Compile Include="MatchStats.cs" />
     <Compile Include="MyEnums.cs" />
     <Compile Include="Objective.cs" />
+    <Compile Include="ObjectiveList.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="PlayerList.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Team.cs" />
-    <EmbeddedResource Include="EditRolesForm.resx">
-      <DependentUpon>EditRolesForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="EditSummonersForm.resx">
       <DependentUpon>EditSummonersForm.cs</DependentUpon>
     </EmbeddedResource>

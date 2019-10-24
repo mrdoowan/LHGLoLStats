@@ -8,18 +8,29 @@ namespace LoLStatsAPIv4_GUI {
     public class LogClass {
         // External static class for Logging actions, cuz why not
 
+        private static string DBLogString;
         private static string LogString;
         private static int APICalls;
         private static bool LogDBCalls;
 
-        public static void ClearLog() {
-            LogString = "";
-            APICalls = 0;
-            LogDBCalls = true;
+        private static void WriteDBLogLine(string str) {
+            DBLogString += str += '\n';
         }
 
-        public static void WriteLine(string str) {
+        public static void WriteLogLine(string str) {
             LogString += str += '\n';
+        }
+
+        public static void ClearLog() {
+            DBLogString = "";
+            LogString = "";
+            APICalls = 0;
+        }
+
+        public static void WriteSQLCmd(string cmdTxt, int rowsAffected = 0) {
+            string str = "Query - \"" + cmdTxt + "\"";
+            if (rowsAffected > 0) { str += ". " + rowsAffected + " rows affected."; }
+            WriteDBLogLine(str);
         }
 
         public static void APICalled(APIParam type, string param, bool failed) {
@@ -34,7 +45,7 @@ namespace LoLStatsAPIv4_GUI {
                 default: break;
             }
             sb.Append("\"" + param + "\"");
-            WriteLine(sb.ToString());
+            WriteLogLine(sb.ToString());
             APICalls++;
         }
 
@@ -43,8 +54,8 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         public static string GetReport() {
-            return ((LogDBCalls) ? LogString : "") + 
-                APICalls.ToString() + " API GET Requests were called.";
+            return ((LogDBCalls) ? DBLogString : "") + 
+                LogString + APICalls.ToString() + " API GET Requests were called.";
         }
     }
 }

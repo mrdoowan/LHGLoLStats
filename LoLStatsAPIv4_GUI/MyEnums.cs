@@ -4,7 +4,13 @@ namespace LoLStatsAPIv4_GUI {
         COUNT,
         SELECT,
         INSERT,
-        UPDATE
+        UPDATE,
+        DELETE
+    }
+
+    public enum Operator {
+        AND,
+        OR
     }
 
     public enum Align {
@@ -21,17 +27,13 @@ namespace LoLStatsAPIv4_GUI {
         TIMELINE
     }
 
-    public enum TeamSide {
-        BLUE,
-        RED
-    }
-
     public enum Role {
         TOP,
         JUNGLE,
         MIDDLE,
         BOTTOM,
-        SUPPORT
+        SUPPORT,
+        NONE
     }
 
     public enum ObjectiveEvent {
@@ -51,6 +53,7 @@ namespace LoLStatsAPIv4_GUI {
         FIRE_DRAGON,    // Infernal Drake
         EARTH_DRAGON,   // Mountain Drake
         WATER_DRAGON,   // Ocean Drake
+        ELDER_DRAGON,
         RIFT_HERALD,
         BARON_NASHOR,
         INHIBITOR
@@ -60,5 +63,24 @@ namespace LoLStatsAPIv4_GUI {
         TOP,
         MID,
         BOT
+    }
+
+    public enum TeamStat {
+        KILLS,
+        DEATHS,
+        ASSISTS,
+        DAMAGE_CHAMPS,
+        DAMAGE_OBJECTIVES,
+        GOLD,
+        CREEP_SCORE,
+        VISION_SCORE,
+        GOLD_AT_15,
+        GOLD_DIFF_15,
+        XP_AT_15,
+        XP_DIFF_15,
+        GOLD_AT_25,
+        GOLD_DIFF_25,
+        XP_AT_25,
+        XP_DIFF_25
     }
 }

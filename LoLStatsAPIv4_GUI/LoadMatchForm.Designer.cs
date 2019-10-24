@@ -23,21 +23,14 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.textBox_BlueTeamName = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.button_OK = new System.Windows.Forms.Button();
-            this.textBox_RedTeamName = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox_MatchId = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.comboBox_BlueTeamName = new System.Windows.Forms.ComboBox();
+            this.comboBox_RedTeamName = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
-            // 
-            // textBox_BlueTeamName
-            // 
-            this.textBox_BlueTeamName.Location = new System.Drawing.Point(118, 11);
-            this.textBox_BlueTeamName.Name = "textBox_BlueTeamName";
-            this.textBox_BlueTeamName.Size = new System.Drawing.Size(246, 20);
-            this.textBox_BlueTeamName.TabIndex = 19;
             // 
             // label6
             // 
@@ -57,13 +50,6 @@
             this.button_OK.Text = "OK";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
-            // 
-            // textBox_RedTeamName
-            // 
-            this.textBox_RedTeamName.Location = new System.Drawing.Point(118, 37);
-            this.textBox_RedTeamName.Name = "textBox_RedTeamName";
-            this.textBox_RedTeamName.Size = new System.Drawing.Size(246, 20);
-            this.textBox_RedTeamName.TabIndex = 24;
             // 
             // label1
             // 
@@ -90,17 +76,35 @@
             this.label2.Text = "Match ID:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // comboBox_BlueTeamName
+            // 
+            this.comboBox_BlueTeamName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_BlueTeamName.FormattingEnabled = true;
+            this.comboBox_BlueTeamName.Location = new System.Drawing.Point(118, 11);
+            this.comboBox_BlueTeamName.Name = "comboBox_BlueTeamName";
+            this.comboBox_BlueTeamName.Size = new System.Drawing.Size(246, 21);
+            this.comboBox_BlueTeamName.TabIndex = 27;
+            // 
+            // comboBox_RedTeamName
+            // 
+            this.comboBox_RedTeamName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_RedTeamName.FormattingEnabled = true;
+            this.comboBox_RedTeamName.Location = new System.Drawing.Point(118, 37);
+            this.comboBox_RedTeamName.Name = "comboBox_RedTeamName";
+            this.comboBox_RedTeamName.Size = new System.Drawing.Size(246, 21);
+            this.comboBox_RedTeamName.TabIndex = 28;
+            // 
             // LoadMatchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(462, 93);
+            this.Controls.Add(this.comboBox_RedTeamName);
+            this.Controls.Add(this.comboBox_BlueTeamName);
             this.Controls.Add(this.textBox_MatchId);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.textBox_RedTeamName);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button_OK);
-            this.Controls.Add(this.textBox_BlueTeamName);
             this.Controls.Add(this.label6);
             this.MaximizeBox = false;
             this.Name = "LoadMatchForm";
@@ -111,13 +115,12 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.TextBox textBox_BlueTeamName;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button button_OK;
-        private System.Windows.Forms.TextBox textBox_RedTeamName;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox_MatchId;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox comboBox_BlueTeamName;
+        private System.Windows.Forms.ComboBox comboBox_RedTeamName;
     }
 }

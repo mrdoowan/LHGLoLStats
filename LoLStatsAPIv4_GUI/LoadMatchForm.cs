@@ -21,9 +21,12 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         public bool OpenWindow(string compName) {
+            var teamNamesArr = MasterWrapper.GetTeamNames(compName).ToArray();
+            comboBox_BlueTeamName.Items.AddRange(teamNamesArr);
+            comboBox_RedTeamName.Items.AddRange(teamNamesArr);
             this.ShowDialog();
             if (pressed) {
-                return MasterWrapper.LoadMatchStatsIntoDB(compName, textBox_BlueTeamName.Text, textBox_RedTeamName.Text, matchId);
+                return MasterWrapper.LoadMatchStatsIntoDB(compName, comboBox_BlueTeamName.Text, comboBox_RedTeamName.Text, matchId);
             }
             return false;
         }
@@ -31,12 +34,15 @@ namespace LoLStatsAPIv4_GUI {
         private void button_OK_Click(object sender, EventArgs e) {
             // Validate inputs
             matchId = 0;
-            if (long.TryParse(textBox_MatchId.Text, out matchId)) {
-                pressed = true;
-                this.Close();
+            if (!long.TryParse(textBox_MatchId.Text, out matchId)) {
+                MessageBox.Show("Match ID is not a valid number!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else if (comboBox_BlueTeamName.Text == comboBox_RedTeamName.Text) {
+                MessageBox.Show("Team names are the same!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else {
-                MessageBox.Show("Match ID is not a valid number!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                pressed = true;
+                this.Close();
             }
         }
     }

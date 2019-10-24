@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace LoLStatsAPIv4_GUI {
-    class Champ {
+    public class Champ {
 
         public string Name { get; set; }
         public int ID { get; set; }
@@ -13,8 +13,7 @@ namespace LoLStatsAPIv4_GUI {
         // Ctor
         public Champ(int _id) {
             ID = _id;
-
-            // Name = Call champion.json and parse it
+            Name = MasterWrapper.GetChampName(_id);
         }
 
     }

@@ -6,7 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace LoLStatsAPIv4_GUI {
@@ -15,15 +15,25 @@ namespace LoLStatsAPIv4_GUI {
         public MainForm() {
             InitializeComponent();
 
+            MasterWrapper.UpdateAPIDevInstance(textBox_apiKey.Text);
+            MasterWrapper.UpdateConnectionString(textBox_ConnectionString.Text);
+
+            // Initialize cache for champ json
+            try { MasterWrapper.InitializeChampDict(); } 
+            catch { }
+
             // Add to List of Competition Names from Database Combobox
             comboBox_Competition.Items.AddRange(MasterWrapper.GetCompetitionNames().ToArray());
+
+            // Initialize LogClass logging DB queries based on checkbox
+            LogClass.SetEnableDBLogs(!checkBox_NoDBLog.Checked);
         }
 
         #region Helper Functions
 
-        private OpenFileDialog OFD(string title) {
+        private OpenFileDialog OFD(string title, string filter) {
             using (OpenFileDialog ofd = new OpenFileDialog()) {
-                ofd.Filter = "Text File (*.txt)|*.txt";
+                ofd.Filter = filter;
                 ofd.Title = title;
                 ofd.RestoreDirectory = true;
 
@@ -36,9 +46,9 @@ namespace LoLStatsAPIv4_GUI {
             }
         }
 
-        private SaveFileDialog SFD(string title) {
+        private SaveFileDialog SFD(string title, string filter) {
             using (SaveFileDialog sfd = new SaveFileDialog()) {
-                sfd.Filter = "Text File (*.txt)|*.txt";
+                sfd.Filter = filter;
                 sfd.Title = title;
                 sfd.OverwritePrompt = true;
                 if (sfd.ShowDialog() == DialogResult.OK) {
@@ -50,9 +60,13 @@ namespace LoLStatsAPIv4_GUI {
             }
         }
 
-        private bool isAPIKeyEmpty() {
+        private bool areFieldsEmpty() {
             if (string.IsNullOrWhiteSpace(textBox_apiKey.Text)) {
                 MessageBox.Show("API Key is empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return true;
+            }
+            else if (string.IsNullOrWhiteSpace(textBox_ConnectionString.Text)) {
+                MessageBox.Show("Connection string is empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return true;
             }
             return false;
@@ -60,19 +74,23 @@ namespace LoLStatsAPIv4_GUI {
 
         #endregion
 
-        private void button_LoadNames_Click(object sender, EventArgs e) {
-            if (isAPIKeyEmpty()) { return; }
+        private void textBox_ConnectionString_TextChanged(object sender, EventArgs e) {
+            MasterWrapper.UpdateConnectionString(textBox_ConnectionString.Text);
+        }
 
-            var ofd_Txt = OFD("Open Summoner Names");
-            if (ofd_Txt == null) { return; }
-            var summonersList = new List<string>(File.ReadLines(ofd_Txt.FileName));
-            if (string.IsNullOrWhiteSpace(textBox_NewCompName.Text)) {
-                MessageBox.Show("Competition name is empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        private void button_LoadNames_Click(object sender, EventArgs e) {
+            if (areFieldsEmpty()) { return; }
+            if (string.IsNullOrWhiteSpace(textBox_NewCompName.Text) || string.IsNullOrWhiteSpace(comboBox_CompetitionType.Text)) {
+                MessageBox.Show("Competition Name or Type is empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
+            var ofd_Txt = OFD("Load Summoner Names", "Text File (*.txt)|*.txt");
+            if (ofd_Txt == null) { return; }
+            var summonersList = new List<string>(File.ReadLines(ofd_Txt.FileName));
+
             LogClass.ClearLog();
-            if (MasterWrapper.LoadSummonerNamesIntoDB(textBox_NewCompName.Text, summonersList)) {
+            if (MasterWrapper.LoadSummonerNamesIntoDB(textBox_NewCompName.Text, comboBox_CompetitionType.Text, summonersList)) {
                 comboBox_Competition.Items.Add(textBox_NewCompName.Text);
                 MessageBox.Show("Player Database updated!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -80,7 +98,7 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         private void button_LoadMatch_Click(object sender, EventArgs e) {
-            if (isAPIKeyEmpty()) { return; }
+            if (areFieldsEmpty()) { return; }
 
             var matchForm = new LoadMatchForm();
             if (string.IsNullOrWhiteSpace(comboBox_Competition.Text)) {
@@ -100,7 +118,7 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         private void button_UpdateRanks_Click(object sender, EventArgs e) {
-            if (isAPIKeyEmpty()) { return; }
+            if (areFieldsEmpty()) { return; }
 
             if (string.IsNullOrWhiteSpace(comboBox_Competition.Text)) {
                 MessageBox.Show("Competition not selected", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -126,7 +144,9 @@ namespace LoLStatsAPIv4_GUI {
             // Add to List of Match IDs from Database Combobox
             comboBox_MatchId.Items.Clear();
             if (!string.IsNullOrWhiteSpace(comboBox_Competition.Text)) {
+                LogClass.ClearLog();
                 comboBox_MatchId.Items.AddRange(MasterWrapper.GetMatchIdList(comboBox_Competition.Text).ToArray());
+                richTextBox_Log.Text = LogClass.GetReport();
             }
         }
 
@@ -135,7 +155,25 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         private void button_LoadTeamNames_Click(object sender, EventArgs e) {
+            if (!string.IsNullOrWhiteSpace(comboBox_Competition.Text)) {
+                LogClass.ClearLog();
+                var form = new EditTeamListForm();
+                form.OpenWindow(comboBox_Competition.Text);
+                richTextBox_Log.Text = LogClass.GetReport();
+            }
+            else {
+                MessageBox.Show("No Competition Name selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
+        private void button_LoadChampJSON_Click(object sender, EventArgs e) {
+            var ofd_JSON = OFD("Open Champ JSON", "JSON File (*.json)|*.json");
+            if (ofd_JSON == null) { return; }
+
+            LogClass.ClearLog();
+            MasterWrapper.LoadChampionJSON(ofd_JSON.FileName);
+            MessageBox.Show("Champions DB updated by JSON file", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            richTextBox_Log.Text = LogClass.GetReport();
         }
     }
 }

@@ -9,35 +9,34 @@ using System.Threading.Tasks;
 namespace LoLStatsAPIv4_GUI {
     public class DBWrapper {
 
-        private readonly static string connectionString =
-            ConfigurationManager.ConnectionStrings["LoLStatsAPIv4_GUI.Properties.Settings.LHGDatabaseConnectionString"].ConnectionString;
+        public static string ConnectionString;
 
         // Does the Table have the queried entry?
-        public static bool DBTableHasEntry(string tableName, Dictionary<string, string> condMap) {
-            using (SqlConnection connection = new SqlConnection(connectionString)) {
-                SqlCommand cmd = QueryBuilder(connection, QueryType.COUNT, tableName, condMap);
+        public static bool DBTableHasEntry(string tableName, Dictionary<string, string> condMap, Operator op = Operator.AND) {
+            using (SqlConnection connection = new SqlConnection(ConnectionString)) {
+                SqlCommand cmd = QueryBuilder(connection, QueryType.COUNT, tableName, condMap, op);
                 connection.Open();
-                LogClass.WriteLine("Query - \"" + cmd.CommandText + "\"");
+                LogClass.WriteSQLCmd(cmd.CommandText);
                 return ((int)cmd.ExecuteScalar() > 0) ? true : false;
             }
         }
 
-        public static void DBInsertIntoTable(string tableName, Dictionary<string, string> condMap) {
-            using (SqlConnection connection = new SqlConnection(connectionString)) {
-                SqlCommand cmd = QueryBuilder(connection, QueryType.INSERT, tableName, condMap);
+        public static void DBInsertIntoTable(string tableName, Dictionary<string, string> colMap) {
+            using (SqlConnection connection = new SqlConnection(ConnectionString)) {
+                SqlCommand cmd = QueryBuilder(connection, QueryType.INSERT, tableName, colMap);
                 connection.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
-                LogClass.WriteLine("Query - \"" + cmd.CommandText + "\". " + rowsAffected + " rows affected.");
+                LogClass.WriteSQLCmd(cmd.CommandText, rowsAffected);
             }
         }
 
         public static List<Dictionary<string, object>> DBReadFromTable(string tableName, Dictionary<string, string> condMap = null) {
-            using (SqlConnection connection = new SqlConnection(connectionString)) {
+            using (SqlConnection connection = new SqlConnection(ConnectionString)) {
                 SqlCommand cmd = QueryBuilder(connection, QueryType.SELECT, tableName, condMap);
                 var returnMap = new List<Dictionary<string, object>>();
                 connection.Open();
                 var reader = cmd.ExecuteReader();
-                LogClass.WriteLine("Query - \"" + cmd.CommandText + "\"");
+                LogClass.WriteSQLCmd(cmd.CommandText);
                 while (reader.Read()) {
                     var element = new Dictionary<string, object>();
                     for (int i = 0; i < reader.FieldCount; ++i) {
@@ -52,19 +51,28 @@ namespace LoLStatsAPIv4_GUI {
             }
         }
 
-        public static void DBUpdateTable(string tableName, Dictionary<string, string> condMap, Dictionary<string, string> setMap) {
-            using (SqlConnection connection = new SqlConnection(connectionString)) {
-                SqlCommand cmd = QueryBuilder(connection, QueryType.UPDATE, tableName, condMap, setMap);
+        public static void DBUpdateTable(string tableName, Dictionary<string, string> condMap, Dictionary<string, string> setMap, Operator op = Operator.AND) {
+            using (SqlConnection connection = new SqlConnection(ConnectionString)) {
+                SqlCommand cmd = QueryBuilder(connection, QueryType.UPDATE, tableName, condMap, op, setMap);
                 connection.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
-                LogClass.WriteLine("Query - \"" + cmd.CommandText + "\". " + rowsAffected + " rows affected.");
+                LogClass.WriteSQLCmd(cmd.CommandText, rowsAffected);
+            }
+        }
+
+        public static void DBDeleteFromTable(string tableName, Dictionary<string, string> condMap, Operator op = Operator.AND) {
+            using (SqlConnection connection = new SqlConnection(ConnectionString)) {
+                SqlCommand cmd = QueryBuilder(connection, QueryType.DELETE, tableName, condMap, op);
+                connection.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                LogClass.WriteSQLCmd(cmd.CommandText, rowsAffected);
             }
         }
 
         #region Private Functions
 
-        private static SqlCommand QueryBuilder(SqlConnection connection, QueryType type, string table, Dictionary<string, string> condMap,
-            Dictionary<string, string> setMap = null) {
+        private static SqlCommand QueryBuilder(SqlConnection connection, QueryType type, string table, Dictionary<string, string> condMap, 
+            Operator op = Operator.AND, Dictionary<string, string> setMap = null) {
             string query = "";
             switch (type) {
                 case QueryType.SELECT:
@@ -75,14 +83,7 @@ namespace LoLStatsAPIv4_GUI {
                     query += "*";
                     if (type == QueryType.COUNT) { query += ")"; }
                     query += " FROM " + table;
-                    if (condMap != null) { 
-                        query += " WHERE";
-                        foreach (string colName in condMap.Keys) {
-                            query += " " + colName + "=@" + colName + " AND";
-                        }
-                        query = query.TrimEnd('A', 'N', 'D');
-                        query = query.TrimEnd(' ');
-                    }
+                    query += WhereQuery(condMap, op);
                     break;
                 case QueryType.INSERT:
                     // INSERT INTO table_name (column1, column2, column3, ...)
@@ -106,12 +107,12 @@ namespace LoLStatsAPIv4_GUI {
                         query += colName + "=@" + colName + ", ";
                     }
                     query = query.TrimEnd(',', ' ');
-                    query += " WHERE";
-                    foreach (string colName in condMap.Keys) {
-                        query += " " + colName + "=@" + colName + " AND";
-                    }
-                    query = query.TrimEnd('A', 'N', 'D');
-                    query = query.TrimEnd(' ');
+                    query += WhereQuery(condMap, op);
+                    break;
+                case QueryType.DELETE:
+                    // DELETE FROM table_name WHERE condition
+                    query += "DELETE FROM " + table;
+                    query += WhereQuery(condMap, op);
                     break;
                 default:
                     break;
@@ -124,10 +125,27 @@ namespace LoLStatsAPIv4_GUI {
             }
             if (setMap != null) {
                 foreach (string colName in setMap.Keys) {
-                    cmd.Parameters.AddWithValue("@" + colName, setMap[colName]);
+                    cmd.Parameters.AddWithValue("@" + colName + "1", setMap[colName]);
                 }
+                // Adding the "1" cuz it's a jank way to make it unique to condMap
             }
             return cmd;
+        }
+
+        // Default Where Query function
+        private static string WhereQuery(Dictionary<string, string> condMap, Operator op) {
+            string query = "";
+            string andOrStr = (op == Operator.AND) ? " AND" : " OR";
+            char[] andOrChars = (op == Operator.AND) ? new char[] { 'A', 'N', 'D' } : new char[] { 'O', 'R' };
+            if (condMap != null) {
+                query += " WHERE";
+                foreach (string colName in condMap.Keys) {
+                    query += " " + colName + "=@" + colName + andOrStr;
+                }
+                query = query.TrimEnd(andOrChars);
+                query = query.TrimEnd(' ');
+            }
+            return query;
         }
 
         #endregion
