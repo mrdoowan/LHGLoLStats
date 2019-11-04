@@ -12,27 +12,29 @@ namespace LoLStatsAPIv4_GUI {
         public static string ConnectionString;
 
         // Does the Table have the queried entry?
-        public static bool DBTableHasEntry(string tableName, Dictionary<string, string> condMap, Operator op = Operator.AND) {
+        public static bool DBTableHasEntry(string tableName, Dictionary<string, Tuple<DB, string>> param, Operator op = Operator.AND) {
             using (SqlConnection connection = new SqlConnection(ConnectionString)) {
-                SqlCommand cmd = QueryBuilder(connection, QueryType.COUNT, tableName, condMap, op);
+                SqlCommand cmd = QueryBuilder(connection, QueryType.COUNT, tableName, param, op);
                 connection.Open();
                 LogClass.WriteSQLCmd(cmd.CommandText);
                 return ((int)cmd.ExecuteScalar() > 0) ? true : false;
             }
         }
 
-        public static void DBInsertIntoTable(string tableName, Dictionary<string, string> colMap) {
+        public static void DBInsertIntoTable(string tableName, Dictionary<string, Tuple<DB, string>> param) {
             using (SqlConnection connection = new SqlConnection(ConnectionString)) {
-                SqlCommand cmd = QueryBuilder(connection, QueryType.INSERT, tableName, colMap);
+                SqlCommand cmd = QueryBuilder(connection, QueryType.INSERT, tableName, param);
                 connection.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
                 LogClass.WriteSQLCmd(cmd.CommandText, rowsAffected);
             }
         }
 
-        public static List<Dictionary<string, object>> DBReadFromTable(string tableName, Dictionary<string, string> condMap = null) {
+        public static List<Dictionary<string, object>> DBReadFromTable(string tableName, Dictionary<string, Tuple<DB, string>> param = null, bool unique = false,
+            Operator op = Operator.AND) {
             using (SqlConnection connection = new SqlConnection(ConnectionString)) {
-                SqlCommand cmd = QueryBuilder(connection, QueryType.SELECT, tableName, condMap);
+                SqlCommand cmd = (unique) ? QueryBuilder(connection, QueryType.UNIQUE, tableName, param, op) : 
+                    QueryBuilder(connection, QueryType.SELECT, tableName, param, op);
                 var returnMap = new List<Dictionary<string, object>>();
                 connection.Open();
                 var reader = cmd.ExecuteReader();
@@ -51,18 +53,18 @@ namespace LoLStatsAPIv4_GUI {
             }
         }
 
-        public static void DBUpdateTable(string tableName, Dictionary<string, string> condMap, Dictionary<string, string> setMap, Operator op = Operator.AND) {
+        public static void DBUpdateTable(string tableName, Dictionary<string, Tuple<DB, string>> param, Operator op = Operator.AND) {
             using (SqlConnection connection = new SqlConnection(ConnectionString)) {
-                SqlCommand cmd = QueryBuilder(connection, QueryType.UPDATE, tableName, condMap, op, setMap);
+                SqlCommand cmd = QueryBuilder(connection, QueryType.UPDATE, tableName, param, op);
                 connection.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
                 LogClass.WriteSQLCmd(cmd.CommandText, rowsAffected);
             }
         }
 
-        public static void DBDeleteFromTable(string tableName, Dictionary<string, string> condMap, Operator op = Operator.AND) {
+        public static void DBDeleteFromTable(string tableName, Dictionary<string, Tuple<DB, string>> param, Operator op = Operator.AND) {
             using (SqlConnection connection = new SqlConnection(ConnectionString)) {
-                SqlCommand cmd = QueryBuilder(connection, QueryType.DELETE, tableName, condMap, op);
+                SqlCommand cmd = QueryBuilder(connection, QueryType.DELETE, tableName, param, op);
                 connection.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
                 LogClass.WriteSQLCmd(cmd.CommandText, rowsAffected);
@@ -71,8 +73,8 @@ namespace LoLStatsAPIv4_GUI {
 
         #region Private Functions
 
-        private static SqlCommand QueryBuilder(SqlConnection connection, QueryType type, string table, Dictionary<string, string> condMap, 
-            Operator op = Operator.AND, Dictionary<string, string> setMap = null) {
+        private static SqlCommand QueryBuilder(SqlConnection connection, QueryType type, string table, Dictionary<string, Tuple<DB, string>> param, 
+            Operator op = Operator.AND) {
             string query = "";
             switch (type) {
                 case QueryType.SELECT:
@@ -80,19 +82,23 @@ namespace LoLStatsAPIv4_GUI {
                     // SELECT column_name FROM table_name WHERE condition;
                     query += "SELECT ";
                     if (type == QueryType.COUNT) { query += "COUNT("; }
-                    query += "*";
+                    else if (type == QueryType.UNIQUE) { query += "DISTINCT"; }
+                    string columnBuild = ColumnQuery(param, DB.COLUMN);
+                    query += (columnBuild.Length == 0) ? "*" : columnBuild;
                     if (type == QueryType.COUNT) { query += ")"; }
                     query += " FROM " + table;
-                    query += WhereQuery(condMap, op);
+                    query += WhereQuery(param, op);
                     break;
                 case QueryType.INSERT:
                     // INSERT INTO table_name (column1, column2, column3, ...)
                     // VALUES(value1, value2, value3, ...);
                     query += "INSERT INTO " + table;
                     string colQuery = "", valQuery = "";
-                    foreach (string colName in condMap.Keys) {
-                        colQuery += colName + ", ";
-                        valQuery += "@" + colName + ", ";
+                    foreach (string colName in param.Keys) {
+                        if (param[colName].Item1 == DB.INSERT) {
+                            colQuery += colName + ", ";
+                            valQuery += "@" + colName + ", ";
+                        }
                     }
                     colQuery = colQuery.TrimEnd(',', ' ');
                     valQuery = valQuery.TrimEnd(',', ' ');
@@ -103,44 +109,37 @@ namespace LoLStatsAPIv4_GUI {
                     // SET column1 = value1, column2 = value2, ...
                     // WHERE condition;
                     query += "UPDATE " + table + " SET ";
-                    foreach (string colName in setMap.Keys) {
-                        query += colName + "=@" + colName + ", ";
-                    }
-                    query = query.TrimEnd(',', ' ');
-                    query += WhereQuery(condMap, op);
+                    query += ColumnQuery(param, DB.SET);
+                    query += WhereQuery(param, op);
                     break;
                 case QueryType.DELETE:
                     // DELETE FROM table_name WHERE condition
                     query += "DELETE FROM " + table;
-                    query += WhereQuery(condMap, op);
+                    query += WhereQuery(param, op);
                     break;
                 default:
                     break;
             }
             SqlCommand cmd = new SqlCommand(query, connection);
-            if (condMap != null) {
-                foreach (string colName in condMap.Keys) {
-                    cmd.Parameters.AddWithValue("@" + colName, condMap[colName]);
+            if (param != null) {
+                foreach (string colName in param.Keys) {
+                    cmd.Parameters.AddWithValue("@" + colName, param[colName].Item2);
                 }
-            }
-            if (setMap != null) {
-                foreach (string colName in setMap.Keys) {
-                    cmd.Parameters.AddWithValue("@" + colName + "1", setMap[colName]);
-                }
-                // Adding the "1" cuz it's a jank way to make it unique to condMap
             }
             return cmd;
         }
 
         // Default Where Query function
-        private static string WhereQuery(Dictionary<string, string> condMap, Operator op) {
+        private static string WhereQuery(Dictionary<string, Tuple<DB, string>> param, Operator op) {
             string query = "";
             string andOrStr = (op == Operator.AND) ? " AND" : " OR";
             char[] andOrChars = (op == Operator.AND) ? new char[] { 'A', 'N', 'D' } : new char[] { 'O', 'R' };
-            if (condMap != null) {
+            if (param != null) {
                 query += " WHERE";
-                foreach (string colName in condMap.Keys) {
-                    query += " " + colName + "=@" + colName + andOrStr;
+                foreach (string colName in param.Keys) {
+                    if (param[colName].Item1 == DB.WHERE) {
+                        query += " " + colName + "=@" + colName + andOrStr;
+                    }
                 }
                 query = query.TrimEnd(andOrChars);
                 query = query.TrimEnd(' ');
@@ -148,7 +147,30 @@ namespace LoLStatsAPIv4_GUI {
             return query;
         }
 
-        #endregion
-    }
+        private static string ColumnQuery(Dictionary<string, Tuple<DB, string>> param, DB queryType) {
+            var sb = new StringBuilder();
+            if (param != null) {
+                if (queryType == DB.COLUMN) {
+                    foreach (string colName in param.Keys) {
+                        if (param[colName].Item1 == DB.COLUMN) {
+                            sb.Append(colName + ", ");
+                        }
+                    }
+                }
+                else if (queryType == DB.SET) {
+                    foreach (string colName in param.Keys) {
+                        if (param[colName].Item1 == DB.SET) {
+                            sb.Append(colName + "=@" + colName + ", ");
+                        }
+                    }
+                }
+            }
+            string query = sb.ToString();
+            return query.TrimEnd(',', ' ');
+        }
 
+        #endregion
+
+
+    }
 }

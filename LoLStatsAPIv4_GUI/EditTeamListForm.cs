@@ -7,104 +7,118 @@ using Microsoft.VisualBasic;
 namespace LoLStatsAPIv4_GUI {
     public partial class EditTeamListForm : Form {
 
-        private bool ButtonPressed;
-        private HashSet<string> OriginalTeamSet;
-        private HashSet<string> RemoveTeamSet;      // Unique names being Removed
-        private HashSet<string> AddTeamSet;         // Unique names newly Added
-        private Dictionary<string, string> EditDict; // Key: New Name, Value: Former Name
+        private string competitionName;
+        Dictionary<string, List<string>> teamList; // Key: Team Name, Value: List of Players in Team
 
         public EditTeamListForm() {
             InitializeComponent();
-            ButtonPressed = false;
-            OriginalTeamSet = new HashSet<string>();
-            RemoveTeamSet = new HashSet<string>();
-            AddTeamSet = new HashSet<string>();
-            EditDict = new Dictionary<string, string>();
+            teamList = new Dictionary<string, List<string>>();
         }
 
         public void OpenWindow(string compName) {
             label_CompetitionName.Text = compName;
-            OriginalTeamSet = MasterWrapper.GetTeamNames(compName).ToHashSet();
-            foreach (string team in OriginalTeamSet) {
+            competitionName = compName;
+            teamList = MasterWrapper.GetTeamNames(compName);
+            foreach (string team in teamList.Keys) {
                 listBox_Teams.Items.Add(team);
             }
             this.ShowDialog();
-            if (ButtonPressed) {
-                // Once confirmed, then do all the query commands
-                foreach (string teamName in RemoveTeamSet) {
-                    MasterWrapper.RemoveTeamInTable(teamName);
-                }
-                foreach (string teamName in AddTeamSet) {
-                    MasterWrapper.AddTeamInTable(teamName, compName);
-                }
-                foreach (string newName in EditDict.Keys) {
-                    MasterWrapper.UpdateTeamNameInTable(EditDict[newName], newName);
-                }
-            }
         }
 
         private void button_AddTeam_Click(object sender, EventArgs e) {
-            string name = Interaction.InputBox("New Team Name:");
-            if (OriginalTeamSet.Contains(name) && !RemoveTeamSet.Contains(name)) {
-                MessageBox.Show("Team name already exists.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            string newName = Interaction.InputBox("New Team Name:");
+            if (string.IsNullOrWhiteSpace(newName)) {
+                return;
+            }
+            else if (teamList.ContainsKey(newName)) {
+                MessageBox.Show("Team name already exists in Competition.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else {
-                if (OriginalTeamSet.Contains(name)) {
-                    // Implies re-adding the Team back to the original
-                    AddTeamSet.Add(name);
-                }
-                RemoveTeamSet.Remove(name);
+                MasterWrapper.AddTeamInDBAndCache(newName);
+                teamList.Add(newName, new List<string>());
+                listBox_Teams.Items.Add(newName);
             }
         }
 
         private void button_Edit_Click(object sender, EventArgs e) {
             if (listBox_Teams.SelectedItems.Count > 0) {
-                string newName = Interaction.InputBox("Edit Team Name to:");
-                if (!string.IsNullOrWhiteSpace(newName)) {
-                    string oldName = listBox_Teams.SelectedItem.ToString();
-                    if (OriginalTeamSet.Contains(oldName)) {
-                        EditDict.Add(newName, oldName);
-                    }
-                    else if (EditDict.ContainsKey(oldName)) {
-                        // The same team was edited twice
-                        string ogName = EditDict[oldName];
-                        EditDict.Remove(oldName);
-                        EditDict.Add(newName, ogName);
-                    }
-                    else {
-                        // It's a newly added Team that suddenly wanted to change names
-                        AddTeamSet.Remove(oldName);
-                        AddTeamSet.Add(newName);
-                    }
-                    listBox_Teams.SelectedItem = newName;
+                string editedName = Interaction.InputBox("Edit Team Name to:");
+                if (string.IsNullOrWhiteSpace(editedName)) {
+                    return;
                 }
-            }
-        }
-
-        // A team cannot be removed if they have Matches attached already, OR if name was edited
-        private void button_RemoveTeam_Click(object sender, EventArgs e) {
-            if (listBox_Teams.SelectedItems.Count > 0) {
-                string name = listBox_Teams.SelectedItem.ToString();
-                if (EditDict.ContainsKey(name)) {
-                    MessageBox.Show("You cannot remove a team whose name has been Edited.",
-                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                else if (!MasterWrapper.IsTeamInMatchesTable(name)) {
-                    RemoveTeamSet.Add(name);
-                    AddTeamSet.Remove(name);
-                    listBox_Teams.Items.RemoveAt(listBox_Teams.SelectedIndex);
+                else if (MasterWrapper.GetTeamID(editedName) != -1) {
+                    MessageBox.Show("Team name already exists in Database.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else {
-                    MessageBox.Show("This team already has stats attached to its name. Please edit the team name instead.",
-                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    string oldName = listBox_Teams.SelectedItem.ToString();
+                    MasterWrapper.UpdateTeamNameInDBAndCache(oldName, editedName);
+                    var list = teamList[oldName];
+                    teamList.Remove(oldName);
+                    teamList.Add(editedName, list);
+                    listBox_Teams.SelectedItem = editedName;
                 }
             }
         }
 
-        private void button_Confirm_Click(object sender, EventArgs e) {
-            ButtonPressed = true;
-            this.Close();
+        // Essentially adds them into the Summoners database forever
+        private void button_AddPlayer_Click(object sender, EventArgs e) {
+            if (listBox_Teams.SelectedIndices.Count > 0) {
+                string teamName = listBox_Teams.SelectedItem.ToString();
+                string addSummoner = Interaction.InputBox("Add Summoner:");
+                string retSummName = MasterWrapper.AddSummonerIntoDBAndCache(competitionName, teamName, addSummoner);
+                if (retSummName == null) {
+                    MessageBox.Show("Summoner name does not exist.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else {
+                    if (addSummoner == retSummName) {
+                        // Brand new summoner
+                        teamList[teamName].Add(retSummName);
+                        listBox_Summoners.Items.Add(retSummName);
+                    }
+                    else {
+                        // Summoner with edited name
+                        teamList[teamName].Remove(retSummName);
+                        teamList[teamName].Add(addSummoner);
+                        int index = listBox_Summoners.Items.IndexOf(retSummName);
+                        listBox_Summoners.Items[index] = addSummoner;
+                    }
+                }
+            }
+            else {
+                MessageBox.Show("Select a Team.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
+        private void button_RemovePlayer_Click(object sender, EventArgs e) {
+            if (listBox_Teams.SelectedIndices.Count > 0 && listBox_Summoners.SelectedIndices.Count > 0) {
+                string teamName = listBox_Teams.SelectedItem.ToString();
+                string summName = listBox_Summoners.SelectedItem.ToString();
+                if (!MasterWrapper.IsSummonerInPlayerStats(summName, teamName)) {
+                    MasterWrapper.RemoveSummonerFromCompetition(summName, competitionName);
+                    teamList[teamName].Remove(summName);
+                    listBox_Summoners.Items.RemoveAt(listBox_Summoners.SelectedIndex);
+                }
+                else {
+                    MessageBox.Show("Cannot remove. Summoner has a Stat attached to this Team.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else {
+                MessageBox.Show("Select a Team and/or Summoner.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void listBox_Teams_SelectedIndexChanged(object sender, EventArgs e) {
+            if (listBox_Teams.SelectedItems.Count > 0) {
+                string name = listBox_Teams.SelectedItem.ToString();
+
+                if (teamList.ContainsKey(name)) {
+                    listBox_Summoners.Items.Clear();
+                    var summList = teamList[name];
+                    foreach (string summ in summList) {
+                        listBox_Summoners.Items.Add(summ);
+                    }
+                }
+            }
+        }
     }
 }

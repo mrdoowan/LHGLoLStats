@@ -7,27 +7,32 @@ using System.Threading.Tasks;
 
 namespace LoLStatsAPIv4_GUI {
     public class Player {
+        
+        private decimal MinuteDuration;
+
         // Ctor
         public Player() { }
 
-        private decimal MinuteDuration;
         public Role Role { get; set; }
+        public string SummonerId { get; set; }
+        public int ChampId { get; set; }
         public bool Win { get; private set; }
         public long Kills { get; private set; }
         public long Deaths { get; private set; }
         public long Assists { get; private set; }
         public decimal GetKDA() {
-            if (Deaths == 0) return -1;
+            if (Kills + Assists == 0) { return 0; }
+            else if (Deaths == 0) { return -1; }
             decimal kda = (decimal)(Kills + Assists) / Deaths;
             return Math.Round(kda, 2, MidpointRounding.AwayFromZero);
         }
-        public int GetKillParticipation(int totalTeamKills) {
+        public decimal GetKillParticipation(int totalTeamKills) {
             decimal value = (decimal)(Kills + Assists) / totalTeamKills;
-            return (int)(Math.Round(value, 0, MidpointRounding.AwayFromZero));
+            return Math.Round(value, 4, MidpointRounding.AwayFromZero) * 100;
         }
-        public int GetDeathPct(int totalTeamDeaths) {
+        public decimal GetDeathParticipation(int totalTeamDeaths) {
             decimal value = (decimal)Deaths / totalTeamDeaths;
-            return (int)(Math.Round(value, 0, MidpointRounding.AwayFromZero));
+            return Math.Round(value, 4, MidpointRounding.AwayFromZero) * 100;
         }
         public long DamageToChamps { get; private set; }
         public decimal GetDamageToChampsPerMinute() {
@@ -88,7 +93,7 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         public void InitializeClass(Participant playerObj, ParticipantFrame frameAt15,
-            ParticipantFrame frameAt25, decimal duration) {
+            ParticipantFrame frameAt25, decimal matchDuration) {
             var ptlObj = playerObj.Timeline;
             Role = (ptlObj.Lane == "TOP") ? Role.TOP :
                 (ptlObj.Lane == "JUNGLE") ? Role.JUNGLE :
@@ -96,10 +101,13 @@ namespace LoLStatsAPIv4_GUI {
                 (ptlObj.Lane == "BOTTOM" && ptlObj.Role == "DUO_CARRY") ? Role.BOTTOM :
                 (ptlObj.Lane == "BOTTOM" && ptlObj.Role == "DUO_SUPPORT") ? Role.SUPPORT : Role.NONE;
 
-            Win = playerObj.Stats.Winner;
-            FirstBloodKill = playerObj.Stats.FirstBloodKill;
-            FirstBloodAssist = playerObj.Stats.FirstBloodAssist;
-            FirstTower = playerObj.Stats.FirstTowerAssist || playerObj.Stats.FirstTowerKill;
+            var playerStats = playerObj.Stats;
+
+            ChampId = playerObj.ChampionId;
+            Win = playerStats.Winner;
+            FirstBloodKill = playerStats.FirstBloodKill;
+            FirstBloodAssist = playerStats.FirstBloodAssist;
+            FirstTower = playerStats.FirstTowerAssist || playerStats.FirstTowerKill;
             CSAt15 = frameAt15.MinionsKilled + frameAt15.JungleMinionsKilled;
             GoldAt15 = frameAt15.TotalGold;
             XPAt15 = frameAt15.XP;
@@ -107,20 +115,21 @@ namespace LoLStatsAPIv4_GUI {
             CSAt25 = frameAt25.MinionsKilled + frameAt25.JungleMinionsKilled;
             GoldAt25 = frameAt25.TotalGold;
             XPAt25 = frameAt25.XP;
-            Kills = playerObj.Stats.Kills;
-            Deaths = playerObj.Stats.Deaths;
-            Assists = playerObj.Stats.Assists;
+            Kills = playerStats.Kills;
+            Deaths = playerStats.Deaths;
+            Assists = playerStats.Assists;
 
-            MinuteDuration = duration;
-            DamageToChamps = playerObj.Stats.TotalDamageDealtToChampions;
-            DamageToObjectives = playerObj.Stats.DamageDealtToObjectives;
-            DamageTaken = playerObj.Stats.TotalDamageTaken;
-            TotalGold = playerObj.Stats.GoldEarned;
-            VisionScore = playerObj.Stats.VisionScore;
-            DoubleKills = playerObj.Stats.DoubleKills;
-            TripleKills = playerObj.Stats.TripleKills;
-            QuadraKills = playerObj.Stats.QuadraKills;
-            PentaKills = playerObj.Stats.PentaKills;
+            MinuteDuration = matchDuration;
+            DamageToChamps = playerStats.TotalDamageDealtToChampions;
+            DamageToObjectives = playerStats.DamageDealtToObjectives;
+            DamageTaken = playerStats.TotalDamageTaken;
+            TotalGold = playerStats.GoldEarned;
+            CreepScore = playerStats.NeutralMinionsKilled + playerStats.TotalMinionsKilled;
+            VisionScore = playerStats.VisionScore;
+            DoubleKills = playerStats.DoubleKills;
+            TripleKills = playerStats.TripleKills;
+            QuadraKills = playerStats.QuadraKills;
+            PentaKills = playerStats.PentaKills;
         }
 
         // Set all Player diff values

@@ -15,18 +15,14 @@ namespace LoLStatsAPIv4_GUI {
         public MainForm() {
             InitializeComponent();
 
-            MasterWrapper.UpdateAPIDevInstance(textBox_apiKey.Text);
+            try { MasterWrapper.UpdateAPIDevInstance(textBox_apiKey.Text); } catch { }
             MasterWrapper.UpdateConnectionString(textBox_ConnectionString.Text);
 
-            // Initialize cache for champ json
-            try { MasterWrapper.InitializeChampDict(); } 
-            catch { }
-
-            // Add to List of Competition Names from Database Combobox
-            comboBox_Competition.Items.AddRange(MasterWrapper.GetCompetitionNames().ToArray());
-
-            // Initialize LogClass logging DB queries based on checkbox
-            LogClass.SetEnableDBLogs(!checkBox_NoDBLog.Checked);
+            // Initialize Cache
+            try { MasterWrapper.InitializeChampCache(); } catch { }
+            try { comboBox_Competition.Items.AddRange(MasterWrapper.InitializeCompetitionCache().ToArray()); } catch { }
+            try { MasterWrapper.InitializeTeamCache(); } catch { }
+            try { MasterWrapper.InitializeSummonerCache(); } catch { }
         }
 
         #region Helper Functions
@@ -78,42 +74,28 @@ namespace LoLStatsAPIv4_GUI {
             MasterWrapper.UpdateConnectionString(textBox_ConnectionString.Text);
         }
 
-        private void button_LoadNames_Click(object sender, EventArgs e) {
-            if (areFieldsEmpty()) { return; }
-            if (string.IsNullOrWhiteSpace(textBox_NewCompName.Text) || string.IsNullOrWhiteSpace(comboBox_CompetitionType.Text)) {
-                MessageBox.Show("Competition Name or Type is empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            var ofd_Txt = OFD("Load Summoner Names", "Text File (*.txt)|*.txt");
-            if (ofd_Txt == null) { return; }
-            var summonersList = new List<string>(File.ReadLines(ofd_Txt.FileName));
-
-            LogClass.ClearLog();
-            if (MasterWrapper.LoadSummonerNamesIntoDB(textBox_NewCompName.Text, comboBox_CompetitionType.Text, summonersList)) {
-                comboBox_Competition.Items.Add(textBox_NewCompName.Text);
-                MessageBox.Show("Player Database updated!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            richTextBox_Log.Text = LogClass.GetReport();
-        }
-
         private void button_LoadMatch_Click(object sender, EventArgs e) {
             if (areFieldsEmpty()) { return; }
 
-            var matchForm = new LoadMatchForm();
             if (string.IsNullOrWhiteSpace(comboBox_Competition.Text)) {
                 MessageBox.Show("Competition not selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            LogClass.ClearLog();
-            if (matchForm.OpenWindow(comboBox_Competition.Text)) {
-                MessageBox.Show("Match Stats updated!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            using (var matchForm = new LoadMatchForm()) {
+                LogClass.ClearLog();
+                string idStr = matchForm.OpenWindow(comboBox_Competition.Text);
+                if (!string.IsNullOrWhiteSpace(idStr)) {
+                    if (!comboBox_MatchId.Items.Contains(idStr)) {
+                        comboBox_MatchId.Items.Add(idStr);
+                        MessageBox.Show("Match Stats updated!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                richTextBox_Log.Text = LogClass.GetReport();
             }
-            richTextBox_Log.Text = LogClass.GetReport();
         }
 
-        private void button_AssignRoles_Click(object sender, EventArgs e) {
+        private void button_EditMatchRoles_Click(object sender, EventArgs e) {
 
         }
 
@@ -132,10 +114,6 @@ namespace LoLStatsAPIv4_GUI {
             richTextBox_Log.Text = LogClass.GetReport();
         }
 
-        private void button_ExportExcel_Click(object sender, EventArgs e) {
-
-        }
-
         private void textBox_apiKey_TextChanged(object sender, EventArgs e) {
             MasterWrapper.UpdateAPIDevInstance(textBox_apiKey.Text);
         }
@@ -150,16 +128,13 @@ namespace LoLStatsAPIv4_GUI {
             }
         }
 
-        private void checkBox_NoDBLog_CheckedChanged(object sender, EventArgs e) {
-            LogClass.SetEnableDBLogs(!checkBox_NoDBLog.Checked);
-        }
-
-        private void button_LoadTeamNames_Click(object sender, EventArgs e) {
+        private void button_EditTeamNames_Click(object sender, EventArgs e) {
             if (!string.IsNullOrWhiteSpace(comboBox_Competition.Text)) {
-                LogClass.ClearLog();
-                var form = new EditTeamListForm();
-                form.OpenWindow(comboBox_Competition.Text);
-                richTextBox_Log.Text = LogClass.GetReport();
+                using (var form = new EditTeamListForm()) {
+                    LogClass.ClearLog();
+                    form.OpenWindow(comboBox_Competition.Text);
+                    richTextBox_Log.Text = LogClass.GetReport();
+                }
             }
             else {
                 MessageBox.Show("No Competition Name selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
