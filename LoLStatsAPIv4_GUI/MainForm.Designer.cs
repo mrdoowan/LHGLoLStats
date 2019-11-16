@@ -41,6 +41,7 @@
             this.textBox_ConnectionString = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
+            this.button_FixDBEntries = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -231,11 +232,23 @@
     "_____________________________________________";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // button_FixDBEntries
+            // 
+            this.button_FixDBEntries.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_FixDBEntries.Location = new System.Drawing.Point(118, 229);
+            this.button_FixDBEntries.Name = "button_FixDBEntries";
+            this.button_FixDBEntries.Size = new System.Drawing.Size(297, 21);
+            this.button_FixDBEntries.TabIndex = 32;
+            this.button_FixDBEntries.Text = "Fix DB Bugs :\')";
+            this.button_FixDBEntries.UseVisualStyleBackColor = true;
+            this.button_FixDBEntries.Click += new System.EventHandler(this.button_FixDBEntries_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(562, 436);
+            this.Controls.Add(this.button_FixDBEntries);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.textBox_ConnectionString);
             this.Controls.Add(this.label5);
@@ -254,6 +267,7 @@
             this.Controls.Add(this.comboBox_Competition);
             this.Controls.Add(this.textBox_apiKey);
             this.Controls.Add(this.label1);
+            this.MinimumSize = new System.Drawing.Size(578, 475);
             this.Name = "MainForm";
             this.Text = "Form1";
             this.ResumeLayout(false);
@@ -280,6 +294,7 @@
         private System.Windows.Forms.TextBox textBox_ConnectionString;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button button_FixDBEntries;
     }
 }
 

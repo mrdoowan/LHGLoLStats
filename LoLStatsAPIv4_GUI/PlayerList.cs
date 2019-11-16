@@ -87,13 +87,13 @@ namespace LoLStatsAPIv4_GUI {
                     case TeamStat.CREEP_SCORE: val += player.CreepScore; break;
                     case TeamStat.VISION_SCORE: val += player.VisionScore; break;
                     case TeamStat.GOLD_AT_15: val += player.GoldAt15; break;
-                    case TeamStat.GOLD_DIFF_15: val += player.CSDiff15; break;
+                    case TeamStat.GOLD_DIFF_15: val += player.GoldDiff15; break;
                     case TeamStat.XP_AT_15: val += player.XPAt15; break;
                     case TeamStat.XP_DIFF_15: val += player.XPDiff15; break;
-                    case TeamStat.GOLD_AT_25: val += player.GoldAt25; break;
-                    case TeamStat.GOLD_DIFF_25: val += player.GoldDiff25; break;
-                    case TeamStat.XP_AT_25: val += player.XPAt25; break;
-                    case TeamStat.XP_DIFF_25: val += player.XPDiff25; break;
+                    case TeamStat.GOLD_AT_25: val += (decimal)player.GoldAt25; break;
+                    case TeamStat.GOLD_DIFF_25: val += (decimal)player.GoldDiff25; break;
+                    case TeamStat.XP_AT_25: val += (decimal)player.XPAt25; break;
+                    case TeamStat.XP_DIFF_25: val += (decimal)player.XPDiff25; break;
                     default: break;
                 }
             }

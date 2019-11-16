@@ -53,13 +53,14 @@
             this.comboBox_RedSummTop = new System.Windows.Forms.ComboBox();
             this.richTextBox_BlueWarning = new System.Windows.Forms.RichTextBox();
             this.richTextBox_RedWarning = new System.Windows.Forms.RichTextBox();
+            this.button_EditNames = new System.Windows.Forms.Button();
             this.groupBox_BlueTeam.SuspendLayout();
             this.groupBox_RedTeam.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_Save
             // 
-            this.button_Save.Location = new System.Drawing.Point(345, 186);
+            this.button_Save.Location = new System.Drawing.Point(345, 194);
             this.button_Save.Name = "button_Save";
             this.button_Save.Size = new System.Drawing.Size(62, 24);
             this.button_Save.TabIndex = 44;
@@ -69,7 +70,7 @@
             // 
             // label13
             // 
-            this.label13.Location = new System.Drawing.Point(345, 144);
+            this.label13.Location = new System.Drawing.Point(345, 152);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(62, 23);
             this.label13.TabIndex = 70;
@@ -78,7 +79,7 @@
             // 
             // label14
             // 
-            this.label14.Location = new System.Drawing.Point(345, 117);
+            this.label14.Location = new System.Drawing.Point(345, 125);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(62, 23);
             this.label14.TabIndex = 69;
@@ -87,7 +88,7 @@
             // 
             // label15
             // 
-            this.label15.Location = new System.Drawing.Point(345, 90);
+            this.label15.Location = new System.Drawing.Point(345, 98);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(62, 23);
             this.label15.TabIndex = 68;
@@ -96,7 +97,7 @@
             // 
             // label16
             // 
-            this.label16.Location = new System.Drawing.Point(345, 63);
+            this.label16.Location = new System.Drawing.Point(345, 71);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(62, 23);
             this.label16.TabIndex = 67;
@@ -105,7 +106,7 @@
             // 
             // label17
             // 
-            this.label17.Location = new System.Drawing.Point(345, 36);
+            this.label17.Location = new System.Drawing.Point(345, 44);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(62, 23);
             this.label17.TabIndex = 66;
@@ -118,6 +119,7 @@
             this.comboBox_BlueChampTop.FormattingEnabled = true;
             this.comboBox_BlueChampTop.Location = new System.Drawing.Point(6, 19);
             this.comboBox_BlueChampTop.Name = "comboBox_BlueChampTop";
+            this.comboBox_BlueChampTop.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.comboBox_BlueChampTop.Size = new System.Drawing.Size(99, 21);
             this.comboBox_BlueChampTop.TabIndex = 59;
             // 
@@ -127,6 +129,7 @@
             this.comboBox_BlueChampJg.FormattingEnabled = true;
             this.comboBox_BlueChampJg.Location = new System.Drawing.Point(6, 46);
             this.comboBox_BlueChampJg.Name = "comboBox_BlueChampJg";
+            this.comboBox_BlueChampJg.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.comboBox_BlueChampJg.Size = new System.Drawing.Size(99, 21);
             this.comboBox_BlueChampJg.TabIndex = 60;
             // 
@@ -136,6 +139,7 @@
             this.comboBox_BlueChampMid.FormattingEnabled = true;
             this.comboBox_BlueChampMid.Location = new System.Drawing.Point(6, 73);
             this.comboBox_BlueChampMid.Name = "comboBox_BlueChampMid";
+            this.comboBox_BlueChampMid.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.comboBox_BlueChampMid.Size = new System.Drawing.Size(99, 21);
             this.comboBox_BlueChampMid.TabIndex = 61;
             // 
@@ -145,6 +149,7 @@
             this.comboBox_BlueChampBot.FormattingEnabled = true;
             this.comboBox_BlueChampBot.Location = new System.Drawing.Point(6, 100);
             this.comboBox_BlueChampBot.Name = "comboBox_BlueChampBot";
+            this.comboBox_BlueChampBot.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.comboBox_BlueChampBot.Size = new System.Drawing.Size(99, 21);
             this.comboBox_BlueChampBot.TabIndex = 62;
             // 
@@ -154,56 +159,57 @@
             this.comboBox_BlueChampSupp.FormattingEnabled = true;
             this.comboBox_BlueChampSupp.Location = new System.Drawing.Point(6, 127);
             this.comboBox_BlueChampSupp.Name = "comboBox_BlueChampSupp";
+            this.comboBox_BlueChampSupp.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.comboBox_BlueChampSupp.Size = new System.Drawing.Size(99, 21);
             this.comboBox_BlueChampSupp.TabIndex = 63;
             // 
             // comboBox_RedChampSupp
             // 
-            this.comboBox_RedChampSupp.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.comboBox_RedChampSupp.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_RedChampSupp.FormattingEnabled = true;
             this.comboBox_RedChampSupp.Location = new System.Drawing.Point(222, 128);
             this.comboBox_RedChampSupp.Name = "comboBox_RedChampSupp";
+            this.comboBox_RedChampSupp.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBox_RedChampSupp.Size = new System.Drawing.Size(99, 21);
             this.comboBox_RedChampSupp.TabIndex = 85;
             // 
             // comboBox_RedChampBot
             // 
-            this.comboBox_RedChampBot.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.comboBox_RedChampBot.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_RedChampBot.FormattingEnabled = true;
             this.comboBox_RedChampBot.Location = new System.Drawing.Point(222, 101);
             this.comboBox_RedChampBot.Name = "comboBox_RedChampBot";
+            this.comboBox_RedChampBot.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBox_RedChampBot.Size = new System.Drawing.Size(99, 21);
             this.comboBox_RedChampBot.TabIndex = 84;
             // 
             // comboBox_RedChampMid
             // 
-            this.comboBox_RedChampMid.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.comboBox_RedChampMid.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_RedChampMid.FormattingEnabled = true;
             this.comboBox_RedChampMid.Location = new System.Drawing.Point(222, 74);
             this.comboBox_RedChampMid.Name = "comboBox_RedChampMid";
+            this.comboBox_RedChampMid.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBox_RedChampMid.Size = new System.Drawing.Size(99, 21);
             this.comboBox_RedChampMid.TabIndex = 83;
             // 
             // comboBox_RedChampJg
             // 
-            this.comboBox_RedChampJg.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.comboBox_RedChampJg.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_RedChampJg.FormattingEnabled = true;
             this.comboBox_RedChampJg.Location = new System.Drawing.Point(222, 47);
             this.comboBox_RedChampJg.Name = "comboBox_RedChampJg";
+            this.comboBox_RedChampJg.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBox_RedChampJg.Size = new System.Drawing.Size(99, 21);
             this.comboBox_RedChampJg.TabIndex = 82;
             // 
             // comboBox_RedChampTop
             // 
-            this.comboBox_RedChampTop.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.comboBox_RedChampTop.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_RedChampTop.FormattingEnabled = true;
             this.comboBox_RedChampTop.Location = new System.Drawing.Point(222, 20);
             this.comboBox_RedChampTop.Name = "comboBox_RedChampTop";
+            this.comboBox_RedChampTop.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBox_RedChampTop.Size = new System.Drawing.Size(99, 21);
             this.comboBox_RedChampTop.TabIndex = 81;
             // 
@@ -220,7 +226,7 @@
             this.groupBox_BlueTeam.Controls.Add(this.comboBox_BlueChampBot);
             this.groupBox_BlueTeam.Controls.Add(this.comboBox_BlueChampMid);
             this.groupBox_BlueTeam.ForeColor = System.Drawing.Color.Blue;
-            this.groupBox_BlueTeam.Location = new System.Drawing.Point(12, 18);
+            this.groupBox_BlueTeam.Location = new System.Drawing.Point(12, 26);
             this.groupBox_BlueTeam.Name = "groupBox_BlueTeam";
             this.groupBox_BlueTeam.Size = new System.Drawing.Size(327, 162);
             this.groupBox_BlueTeam.TabIndex = 86;
@@ -233,6 +239,7 @@
             this.comboBox_BlueSummTop.FormattingEnabled = true;
             this.comboBox_BlueSummTop.Location = new System.Drawing.Point(114, 19);
             this.comboBox_BlueSummTop.Name = "comboBox_BlueSummTop";
+            this.comboBox_BlueSummTop.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.comboBox_BlueSummTop.Size = new System.Drawing.Size(207, 21);
             this.comboBox_BlueSummTop.TabIndex = 64;
             // 
@@ -242,6 +249,7 @@
             this.comboBox_BlueSummSupp.FormattingEnabled = true;
             this.comboBox_BlueSummSupp.Location = new System.Drawing.Point(114, 127);
             this.comboBox_BlueSummSupp.Name = "comboBox_BlueSummSupp";
+            this.comboBox_BlueSummSupp.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.comboBox_BlueSummSupp.Size = new System.Drawing.Size(207, 21);
             this.comboBox_BlueSummSupp.TabIndex = 68;
             // 
@@ -251,6 +259,7 @@
             this.comboBox_BlueSummJg.FormattingEnabled = true;
             this.comboBox_BlueSummJg.Location = new System.Drawing.Point(114, 46);
             this.comboBox_BlueSummJg.Name = "comboBox_BlueSummJg";
+            this.comboBox_BlueSummJg.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.comboBox_BlueSummJg.Size = new System.Drawing.Size(207, 21);
             this.comboBox_BlueSummJg.TabIndex = 65;
             // 
@@ -260,6 +269,7 @@
             this.comboBox_BlueSummBot.FormattingEnabled = true;
             this.comboBox_BlueSummBot.Location = new System.Drawing.Point(114, 100);
             this.comboBox_BlueSummBot.Name = "comboBox_BlueSummBot";
+            this.comboBox_BlueSummBot.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.comboBox_BlueSummBot.Size = new System.Drawing.Size(207, 21);
             this.comboBox_BlueSummBot.TabIndex = 67;
             // 
@@ -269,6 +279,7 @@
             this.comboBox_BlueSummMid.FormattingEnabled = true;
             this.comboBox_BlueSummMid.Location = new System.Drawing.Point(114, 73);
             this.comboBox_BlueSummMid.Name = "comboBox_BlueSummMid";
+            this.comboBox_BlueSummMid.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.comboBox_BlueSummMid.Size = new System.Drawing.Size(207, 21);
             this.comboBox_BlueSummMid.TabIndex = 66;
             // 
@@ -285,7 +296,7 @@
             this.groupBox_RedTeam.Controls.Add(this.comboBox_RedChampJg);
             this.groupBox_RedTeam.Controls.Add(this.comboBox_RedChampTop);
             this.groupBox_RedTeam.ForeColor = System.Drawing.Color.Red;
-            this.groupBox_RedTeam.Location = new System.Drawing.Point(413, 18);
+            this.groupBox_RedTeam.Location = new System.Drawing.Point(413, 26);
             this.groupBox_RedTeam.Name = "groupBox_RedTeam";
             this.groupBox_RedTeam.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.groupBox_RedTeam.Size = new System.Drawing.Size(327, 162);
@@ -295,51 +306,51 @@
             // 
             // comboBox_RedSummSupp
             // 
-            this.comboBox_RedSummSupp.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.comboBox_RedSummSupp.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_RedSummSupp.FormattingEnabled = true;
             this.comboBox_RedSummSupp.Location = new System.Drawing.Point(6, 127);
             this.comboBox_RedSummSupp.Name = "comboBox_RedSummSupp";
+            this.comboBox_RedSummSupp.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBox_RedSummSupp.Size = new System.Drawing.Size(210, 21);
             this.comboBox_RedSummSupp.TabIndex = 90;
             // 
             // comboBox_RedSummBot
             // 
-            this.comboBox_RedSummBot.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.comboBox_RedSummBot.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_RedSummBot.FormattingEnabled = true;
             this.comboBox_RedSummBot.Location = new System.Drawing.Point(6, 100);
             this.comboBox_RedSummBot.Name = "comboBox_RedSummBot";
+            this.comboBox_RedSummBot.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBox_RedSummBot.Size = new System.Drawing.Size(210, 21);
             this.comboBox_RedSummBot.TabIndex = 89;
             // 
             // comboBox_RedSummMid
             // 
-            this.comboBox_RedSummMid.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.comboBox_RedSummMid.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_RedSummMid.FormattingEnabled = true;
             this.comboBox_RedSummMid.Location = new System.Drawing.Point(6, 73);
             this.comboBox_RedSummMid.Name = "comboBox_RedSummMid";
+            this.comboBox_RedSummMid.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBox_RedSummMid.Size = new System.Drawing.Size(210, 21);
             this.comboBox_RedSummMid.TabIndex = 88;
             // 
             // comboBox_RedSummJg
             // 
-            this.comboBox_RedSummJg.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.comboBox_RedSummJg.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_RedSummJg.FormattingEnabled = true;
             this.comboBox_RedSummJg.Location = new System.Drawing.Point(6, 46);
             this.comboBox_RedSummJg.Name = "comboBox_RedSummJg";
+            this.comboBox_RedSummJg.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBox_RedSummJg.Size = new System.Drawing.Size(210, 21);
             this.comboBox_RedSummJg.TabIndex = 87;
             // 
             // comboBox_RedSummTop
             // 
-            this.comboBox_RedSummTop.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.comboBox_RedSummTop.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_RedSummTop.FormattingEnabled = true;
             this.comboBox_RedSummTop.Location = new System.Drawing.Point(6, 19);
             this.comboBox_RedSummTop.Name = "comboBox_RedSummTop";
+            this.comboBox_RedSummTop.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBox_RedSummTop.Size = new System.Drawing.Size(210, 21);
             this.comboBox_RedSummTop.TabIndex = 86;
             // 
@@ -347,7 +358,7 @@
             // 
             this.richTextBox_BlueWarning.BackColor = System.Drawing.SystemColors.ControlLight;
             this.richTextBox_BlueWarning.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richTextBox_BlueWarning.Location = new System.Drawing.Point(12, 186);
+            this.richTextBox_BlueWarning.Location = new System.Drawing.Point(12, 194);
             this.richTextBox_BlueWarning.Name = "richTextBox_BlueWarning";
             this.richTextBox_BlueWarning.ReadOnly = true;
             this.richTextBox_BlueWarning.Size = new System.Drawing.Size(327, 36);
@@ -358,18 +369,29 @@
             // 
             this.richTextBox_RedWarning.BackColor = System.Drawing.SystemColors.ControlLight;
             this.richTextBox_RedWarning.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richTextBox_RedWarning.Location = new System.Drawing.Point(413, 186);
+            this.richTextBox_RedWarning.Location = new System.Drawing.Point(413, 194);
             this.richTextBox_RedWarning.Name = "richTextBox_RedWarning";
             this.richTextBox_RedWarning.ReadOnly = true;
             this.richTextBox_RedWarning.Size = new System.Drawing.Size(327, 36);
             this.richTextBox_RedWarning.TabIndex = 89;
             this.richTextBox_RedWarning.Text = "";
             // 
+            // button_EditNames
+            // 
+            this.button_EditNames.Location = new System.Drawing.Point(345, 6);
+            this.button_EditNames.Name = "button_EditNames";
+            this.button_EditNames.Size = new System.Drawing.Size(62, 35);
+            this.button_EditNames.TabIndex = 90;
+            this.button_EditNames.Text = "Edit Names";
+            this.button_EditNames.UseVisualStyleBackColor = true;
+            this.button_EditNames.Click += new System.EventHandler(this.button_EditNames_Click);
+            // 
             // EditSummonersForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(753, 234);
+            this.ClientSize = new System.Drawing.Size(753, 242);
+            this.Controls.Add(this.button_EditNames);
             this.Controls.Add(this.richTextBox_RedWarning);
             this.Controls.Add(this.richTextBox_BlueWarning);
             this.Controls.Add(this.label13);
@@ -420,5 +442,6 @@
         private System.Windows.Forms.ComboBox comboBox_RedSummTop;
         private System.Windows.Forms.RichTextBox richTextBox_BlueWarning;
         private System.Windows.Forms.RichTextBox richTextBox_RedWarning;
+        private System.Windows.Forms.Button button_EditNames;
     }
 }

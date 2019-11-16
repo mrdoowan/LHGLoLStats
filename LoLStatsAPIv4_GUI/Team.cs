@@ -91,29 +91,29 @@ namespace LoLStatsAPIv4_GUI {
         public int GetKillsDiff15() {
             return Objectives.KillsDiff15;
         }
-        public int GetGoldAt25() {
-            return (int)Players.GetTeamTotalStat(TeamStat.GOLD_AT_25);
+        public int? GetGoldAt25() {
+            return (MinuteDuration < MasterWrapper.MINUTE_25) ? (int?)null : (int)Players.GetTeamTotalStat(TeamStat.GOLD_AT_25);
         }
-        public int GetGoldDiff25() {
-            return (int)Players.GetTeamTotalStat(TeamStat.GOLD_DIFF_25);
+        public int? GetGoldDiff25() {
+            return (MinuteDuration < MasterWrapper.MINUTE_25) ? (int?)null : (int)Players.GetTeamTotalStat(TeamStat.GOLD_DIFF_25);
         }
-        public int GetXPAt25() {
-            return (int)Players.GetTeamTotalStat(TeamStat.XP_AT_25);
+        public int? GetXPAt25() {
+            return (MinuteDuration < MasterWrapper.MINUTE_25) ? (int?)null : (int)Players.GetTeamTotalStat(TeamStat.XP_AT_25);
         }
-        public int GetXPDiff25() {
-            return (int)Players.GetTeamTotalStat(TeamStat.XP_DIFF_25);
+        public int? GetXPDiff25() {
+            return (MinuteDuration < MasterWrapper.MINUTE_25) ? (int?)null : (int)Players.GetTeamTotalStat(TeamStat.XP_DIFF_25);
         }
-        public int GetTowersAt25() {
-            return Objectives.TowersAt25;
+        public int? GetTowersAt25() {
+            return (MinuteDuration < MasterWrapper.MINUTE_25) ? (int?)null : Objectives.TowersAt25;
         }
-        public int GetTowersDiff25() {
-            return Objectives.TowersDiff25;
+        public int? GetTowersDiff25() {
+            return (MinuteDuration < MasterWrapper.MINUTE_25) ? (int?)null : Objectives.TowersDiff25;
         }
-        public int GetKillsAt25() {
-            return Objectives.KillsAt25;
+        public int? GetKillsAt25() {
+            return (MinuteDuration < MasterWrapper.MINUTE_25) ? (int?)null : Objectives.KillsAt25;
         }
-        public int GetKillsDiff25() {
-            return Objectives.KillsDiff25;
+        public int? GetKillsDiff25() {
+            return (MinuteDuration < MasterWrapper.MINUTE_25) ? (int?)null : Objectives.KillsDiff25;
         }
 
         #endregion
@@ -134,7 +134,7 @@ namespace LoLStatsAPIv4_GUI {
             string pID = playerObj.ParticipantId.ToString();
             ParticipantIds.Add(pID);
             var pFrameAt15 = frameMinutes[MasterWrapper.MINUTE_15].ParticipantFrames[pID];
-            var pFrameAt25 = frameMinutes[MasterWrapper.MINUTE_25].ParticipantFrames[pID];
+            var pFrameAt25 = (MinuteDuration < MasterWrapper.MINUTE_25) ? null : frameMinutes[MasterWrapper.MINUTE_25].ParticipantFrames[pID];
             Players.AddPlayer(playerObj, pFrameAt15, pFrameAt25, MinuteDuration);
         }
 
@@ -152,6 +152,14 @@ namespace LoLStatsAPIv4_GUI {
 
         public void SetPlayerDiffs(PlayerList oppPlayers) {
             Players.SetPlayerDiffs(oppPlayers);
+        }
+
+        public void SetPlayerIDs(Dictionary<Role, Tuple<string, int>> teamDict) {
+            if (teamDict == null) { return; }
+            foreach (Role role in teamDict.Keys) {
+                Players[role].SummonerId = teamDict[role].Item1;
+                Players[role].ChampId = teamDict[role].Item2;
+            }
         }
 
         // Any non-API database columns needs to be in the form of a public function

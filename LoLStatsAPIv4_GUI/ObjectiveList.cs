@@ -132,7 +132,7 @@ namespace LoLStatsAPIv4_GUI {
                         enumType,
                         eventObj.Timestamp,
                         eventObj.LaneType,
-                        0);
+                        null);
                 Objectives.Add(objective);
                 EventIdx[enumEvent].Add(Objectives.Count - 1);
             }
@@ -149,14 +149,14 @@ namespace LoLStatsAPIv4_GUI {
         public void UpdateBaronPP(List<MatchFrame> frameList, HashSet<string> teamPartIds, HashSet<string> oppPartIds) {
             foreach (int idx in EventIdx[ObjectiveEvent.BARON_KILL]) {
                 TimeSpan tsAtKill = Objectives[idx].Timestamp;
-                int teamGoldAtKill = TeamGoldAtTimeStamp(tsAtKill, frameList, teamPartIds);
-                int oppGoldAtKill = TeamGoldAtTimeStamp(tsAtKill, frameList, oppPartIds);
-                if (teamGoldAtKill == 0 || oppGoldAtKill == 0) { continue; }
+                int? teamGoldAtKill = TeamGoldAtTimeStamp(tsAtKill, frameList, teamPartIds);
+                int? oppGoldAtKill = TeamGoldAtTimeStamp(tsAtKill, frameList, oppPartIds);
+                if (teamGoldAtKill == null || oppGoldAtKill == null) { continue; }
                 TimeSpan tsAtExpire = tsAtKill + TimeSpan.FromMinutes(BARON_DURATION);
-                int teamGoldAtExpire = TeamGoldAtTimeStamp(tsAtExpire, frameList, teamPartIds);
-                int oppGoldAtExpire = TeamGoldAtTimeStamp(tsAtExpire, frameList, oppPartIds);
-                if (teamGoldAtExpire == 0 || oppGoldAtExpire == 0) { continue; }
-                int baronPP = (teamGoldAtExpire - teamGoldAtKill) - (oppGoldAtExpire - oppGoldAtKill);
+                int? teamGoldAtExpire = TeamGoldAtTimeStamp(tsAtExpire, frameList, teamPartIds);
+                int? oppGoldAtExpire = TeamGoldAtTimeStamp(tsAtExpire, frameList, oppPartIds);
+                if (teamGoldAtExpire == null || oppGoldAtExpire == null) { continue; }
+                int? baronPP = (teamGoldAtExpire - teamGoldAtKill) - (oppGoldAtExpire - oppGoldAtKill);
                 Objectives[idx].BaronPowerPlay = baronPP;
             }
         }
@@ -170,10 +170,10 @@ namespace LoLStatsAPIv4_GUI {
 
         #region Private Functions
 
-        private int TeamGoldAtTimeStamp(TimeSpan timeStamp, List<MatchFrame> frameList, HashSet<string> teamPartIds) {
+        private int? TeamGoldAtTimeStamp(TimeSpan timeStamp, List<MatchFrame> frameList, HashSet<string> teamPartIds) {
             int tsMinute = (int)timeStamp.TotalMinutes;
             int tsSecond = (int)timeStamp.TotalSeconds % 60;
-            if (tsMinute + 1 >= frameList.Count) { return 0; } // Means out of Range
+            if (tsMinute + 1 >= frameList.Count) { return null; } // Means out of Range
 
             // Take team Gold at the marked minute, and minute + 1. Average
             int teamGoldAtMinute = TeamGoldAtFrame(frameList[tsMinute].ParticipantFrames, teamPartIds);

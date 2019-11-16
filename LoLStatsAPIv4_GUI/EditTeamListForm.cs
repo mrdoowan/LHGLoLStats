@@ -66,22 +66,20 @@ namespace LoLStatsAPIv4_GUI {
                 string teamName = listBox_Teams.SelectedItem.ToString();
                 string addSummoner = Interaction.InputBox("Add Summoner:");
                 string retSummName = MasterWrapper.AddSummonerIntoDBAndCache(competitionName, teamName, addSummoner);
-                if (retSummName == null) {
-                    MessageBox.Show("Summoner name does not exist.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (retSummName == null) { 
+                    return; 
+                }
+                else if (addSummoner == retSummName) {
+                    // Brand new summoner
+                    teamList[teamName].Add(retSummName);
+                    listBox_Summoners.Items.Add(retSummName);
                 }
                 else {
-                    if (addSummoner == retSummName) {
-                        // Brand new summoner
-                        teamList[teamName].Add(retSummName);
-                        listBox_Summoners.Items.Add(retSummName);
-                    }
-                    else {
-                        // Summoner with edited name
-                        teamList[teamName].Remove(retSummName);
-                        teamList[teamName].Add(addSummoner);
-                        int index = listBox_Summoners.Items.IndexOf(retSummName);
-                        listBox_Summoners.Items[index] = addSummoner;
-                    }
+                    // Summoner with edited name
+                    teamList[teamName].Remove(retSummName);
+                    teamList[teamName].Add(addSummoner);
+                    int index = listBox_Summoners.Items.IndexOf(retSummName);
+                    listBox_Summoners.Items[index] = addSummoner;
                 }
             }
             else {

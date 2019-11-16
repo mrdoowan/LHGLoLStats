@@ -56,7 +56,7 @@ namespace LoLStatsAPIv4_GUI {
             }
         }
 
-        private bool areFieldsEmpty() {
+        private bool AreMainFieldsEmpty() {
             if (string.IsNullOrWhiteSpace(textBox_apiKey.Text)) {
                 MessageBox.Show("API Key is empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return true;
@@ -75,7 +75,7 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         private void button_LoadMatch_Click(object sender, EventArgs e) {
-            if (areFieldsEmpty()) { return; }
+            if (AreMainFieldsEmpty()) { return; }
 
             if (string.IsNullOrWhiteSpace(comboBox_Competition.Text)) {
                 MessageBox.Show("Competition not selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -96,11 +96,24 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         private void button_EditMatchRoles_Click(object sender, EventArgs e) {
+            // Currently does nothing heehee xd
+            if (AreMainFieldsEmpty()) { return; }
 
+            if (string.IsNullOrWhiteSpace(comboBox_MatchId.Text)) {
+                MessageBox.Show("Match ID not selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            LogClass.ClearLog();
+            string idStr = MasterWrapper.LoadEditedMatchStatsIntoDB(long.Parse(comboBox_MatchId.Text));
+            if (!string.IsNullOrWhiteSpace(idStr)) {
+                MessageBox.Show("Match Stat " + idStr + " updated!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            richTextBox_Log.Text = LogClass.GetReport();
         }
 
         private void button_UpdateRanks_Click(object sender, EventArgs e) {
-            if (areFieldsEmpty()) { return; }
+            if (AreMainFieldsEmpty()) { return; }
 
             if (string.IsNullOrWhiteSpace(comboBox_Competition.Text)) {
                 MessageBox.Show("Competition not selected", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -149,6 +162,19 @@ namespace LoLStatsAPIv4_GUI {
             MasterWrapper.LoadChampionJSON(ofd_JSON.FileName);
             MessageBox.Show("Champions DB updated by JSON file", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             richTextBox_Log.Text = LogClass.GetReport();
+        }
+
+        private void button_FixDBEntries_Click(object sender, EventArgs e) {
+            if (AreMainFieldsEmpty()) { return; }
+
+            MessageBox.Show("No bugs to fix!", "Nothing", MessageBoxButtons.OK, MessageBoxIcon.Information); return;
+
+            LogClass.ClearLog();
+            if (!MasterWrapper.ArbitraryBugFix()) {
+                MessageBox.Show("Error happened :(", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            richTextBox_Log.Text = LogClass.GetReport();
+            MessageBox.Show("Gasp. Bug fixed!", "Yay", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

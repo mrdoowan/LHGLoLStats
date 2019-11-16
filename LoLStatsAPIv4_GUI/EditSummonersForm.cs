@@ -14,38 +14,41 @@ namespace LoLStatsAPIv4_GUI {
         private bool ButtonPressed;
         private Dictionary<string, Player> BluePlayerDict;  // Champ Name to Player object
         private Dictionary<string, Player> RedPlayerDict;   // Champ Name to Player object
-        private Dictionary<Role, ComboBox> BlueChampDict;
-        private Dictionary<Role, ComboBox> RedChampDict;
-        private Dictionary<Role, ComboBox> BlueSummDict;
-        private Dictionary<Role, ComboBox> RedSummDict;
+        private Dictionary<Role, ComboBox> BlueCBChampDict;
+        private Dictionary<Role, ComboBox> RedCBChampDict;
+        private Dictionary<Role, ComboBox> BlueCBSummDict;
+        private Dictionary<Role, ComboBox> RedCBSummDict;
+        private string competitionName;
+        private string blueTeamName;
+        private string redTeamName;
 
         public EditSummonersForm() {
             InitializeComponent();
             ButtonPressed = false;
             BluePlayerDict = new Dictionary<string, Player>();
             RedPlayerDict = new Dictionary<string, Player>();
-            BlueChampDict = new Dictionary<Role, ComboBox>() {
+            BlueCBChampDict = new Dictionary<Role, ComboBox>() {
                 { Role.TOP, comboBox_BlueChampTop },
                 { Role.JUNGLE, comboBox_BlueChampJg },
                 { Role.MIDDLE, comboBox_BlueChampMid },
                 { Role.BOTTOM, comboBox_BlueChampBot },
                 { Role.SUPPORT, comboBox_BlueChampSupp }
             };
-            RedChampDict = new Dictionary<Role, ComboBox>() {
+            RedCBChampDict = new Dictionary<Role, ComboBox>() {
                 { Role.TOP, comboBox_RedChampTop },
                 { Role.JUNGLE, comboBox_RedChampJg },
                 { Role.MIDDLE, comboBox_RedChampMid },
                 { Role.BOTTOM, comboBox_RedChampBot },
                 { Role.SUPPORT, comboBox_RedChampSupp }
             };
-            BlueSummDict = new Dictionary<Role, ComboBox>() {
+            BlueCBSummDict = new Dictionary<Role, ComboBox>() {
                 { Role.TOP, comboBox_BlueSummTop },
                 { Role.JUNGLE, comboBox_BlueSummJg },
                 { Role.MIDDLE, comboBox_BlueSummMid },
                 { Role.BOTTOM, comboBox_BlueSummBot },
                 { Role.SUPPORT, comboBox_BlueSummSupp }
             };
-            RedSummDict = new Dictionary<Role, ComboBox>() {
+            RedCBSummDict = new Dictionary<Role, ComboBox>() {
                 { Role.TOP, comboBox_RedSummTop },
                 { Role.JUNGLE, comboBox_RedSummJg },
                 { Role.MIDDLE, comboBox_RedSummMid },
@@ -55,11 +58,15 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         public Dictionary<int, PlayerList> OpenWindow(string compName, Team blueTeam, Team redTeam) {
-            groupBox_BlueTeam.Text = "BLUE TEAM [" + MasterWrapper.GetTeamName(blueTeam.TeamId) + "]";
-            groupBox_RedTeam.Text = "RED TEAM [" + MasterWrapper.GetTeamName(redTeam.TeamId) + "]";
+            competitionName = compName;
+            blueTeamName = MasterWrapper.GetTeamName(blueTeam.TeamId);
+            redTeamName = MasterWrapper.GetTeamName(redTeam.TeamId);
+            groupBox_BlueTeam.Text = "BLUE TEAM [" + blueTeamName + "]";
+            groupBox_RedTeam.Text = "RED TEAM [" + redTeamName + "]";
             var blueTeamPlayers = blueTeam.Players;
             var redTeamPlayers = redTeam.Players;
-            // 
+            
+            // Initializes Player dictionary from ChampName -> Player Object
             foreach (Player player in blueTeamPlayers) {
                 string champName = MasterWrapper.GetChampName(player.ChampId);
                 BluePlayerDict.Add(champName, player);
@@ -68,36 +75,26 @@ namespace LoLStatsAPIv4_GUI {
                 string champName = MasterWrapper.GetChampName(player.ChampId);
                 RedPlayerDict.Add(champName, player);
             }
-
-            var teamList = MasterWrapper.GetTeamNames(compName);
-            foreach (ComboBox cb in BlueChampDict.Values) {
+            // Add all champ names into Combobox Items
+            foreach (ComboBox cb in BlueCBChampDict.Values) {
                 cb.Items.AddRange(blueTeamPlayers.GetChampionsList().ToArray());
             }
-            foreach (ComboBox cb in RedChampDict.Values) {
+            foreach (ComboBox cb in RedCBChampDict.Values) {
                 cb.Items.AddRange(redTeamPlayers.GetChampionsList().ToArray());
             }
-            string blueTeamName = MasterWrapper.GetTeamName(blueTeam.TeamId);
-            foreach (ComboBox cb in BlueSummDict.Values) {
-                cb.Items.Add("");
-                cb.Items.AddRange(teamList[blueTeamName].ToArray());
-            }
-            string redTeamName = MasterWrapper.GetTeamName(redTeam.TeamId);
-            foreach (ComboBox cb in RedSummDict.Values) {
-                cb.Items.Add("");
-                cb.Items.AddRange(teamList[redTeamName].ToArray());
-            }
+            FillSummonerNames();
 
-            foreach (Role role in BlueChampDict.Keys) {
-                BlueChampDict[role].Text = MasterWrapper.GetChampName(blueTeamPlayers[role].ChampId);
+            foreach (Role role in BlueCBChampDict.Keys) {
+                BlueCBChampDict[role].Text = MasterWrapper.GetChampName(blueTeamPlayers[role].ChampId);
             }
-            foreach (Role role in RedChampDict.Keys) {
-                RedChampDict[role].Text = MasterWrapper.GetChampName(redTeamPlayers[role].ChampId);
+            foreach (Role role in RedCBChampDict.Keys) {
+                RedCBChampDict[role].Text = MasterWrapper.GetChampName(redTeamPlayers[role].ChampId);
             }
-            foreach (Role role in BlueSummDict.Keys) {
-                BlueSummDict[role].Text = MasterWrapper.GetSummonerName(blueTeamPlayers[role].SummonerId);
+            foreach (Role role in BlueCBSummDict.Keys) {
+                BlueCBSummDict[role].Text = MasterWrapper.GetSummonerName(blueTeamPlayers[role].SummonerId);
             }
-            foreach (Role role in RedSummDict.Keys) {
-                RedSummDict[role].Text = MasterWrapper.GetSummonerName(redTeamPlayers[role].SummonerId);
+            foreach (Role role in RedCBSummDict.Keys) {
+                RedCBSummDict[role].Text = MasterWrapper.GetSummonerName(redTeamPlayers[role].SummonerId);
             }
 
             richTextBox_BlueWarning.Text = WarningMessage(blueTeam.Players.GetUnassignedRoles());
@@ -106,18 +103,18 @@ namespace LoLStatsAPIv4_GUI {
             this.ShowDialog();
             if (ButtonPressed) {
                 var output = new Dictionary<int, PlayerList>();
-                foreach (Role role in BlueChampDict.Keys) {
-                    string champName = BlueChampDict[role].Text;
+                foreach (Role role in BlueCBChampDict.Keys) {
+                    string champName = BlueCBChampDict[role].Text;
                     var bluePlayer = BluePlayerDict[champName];
-                    bluePlayer.SummonerId = MasterWrapper.GetSummonerID(BlueSummDict[role].Text);
+                    bluePlayer.SummonerId = MasterWrapper.GetSummonerID(BlueCBSummDict[role].Text);
                     bluePlayer.Role = role;
                     blueTeamPlayers[role] = bluePlayer;
                 }
                 output.Add(MasterWrapper.BLUE_ID, blueTeamPlayers);
-                foreach (Role role in RedChampDict.Keys) {
-                    string champName = RedChampDict[role].Text;
+                foreach (Role role in RedCBChampDict.Keys) {
+                    string champName = RedCBChampDict[role].Text;
                     var redPlayer = RedPlayerDict[champName];
-                    redPlayer.SummonerId = MasterWrapper.GetSummonerID(RedSummDict[role].Text);
+                    redPlayer.SummonerId = MasterWrapper.GetSummonerID(RedCBSummDict[role].Text);
                     redPlayer.Role = role;
                     redTeamPlayers[role] = redPlayer;
                 }
@@ -125,6 +122,24 @@ namespace LoLStatsAPIv4_GUI {
                 return output;
             }
             return null;
+        }
+
+        private void FillSummonerNames() {
+            var teamList = MasterWrapper.GetTeamNames(competitionName);
+            foreach (ComboBox cb in BlueCBSummDict.Values) {
+                string currText = cb.Text;
+                cb.Items.Clear();
+                cb.Items.Add("");
+                cb.Items.AddRange(teamList[blueTeamName].ToArray());
+                cb.Text = currText;
+            }
+            foreach (ComboBox cb in RedCBSummDict.Values) {
+                string currText = cb.Text;
+                cb.Items.Clear();
+                cb.Items.Add("");
+                cb.Items.AddRange(teamList[redTeamName].ToArray());
+                cb.Text = currText;
+            }
         }
 
         private string WarningMessage(List<Role> roleList) {
@@ -139,15 +154,16 @@ namespace LoLStatsAPIv4_GUI {
 
         private void button_Save_Click(object sender, EventArgs e) {
             var errorList = new List<string>();
-            foreach (Role role in BlueSummDict.Keys) {
-                ComboBox tb = BlueSummDict[role];
-                if (string.IsNullOrWhiteSpace(MasterWrapper.GetSummonerID(tb.Text))) {
+            foreach (Role role in BlueCBSummDict.Keys) {
+                ComboBox cbSumm = BlueCBSummDict[role];
+                ComboBox cbChamp = BlueCBChampDict[role];
+                if (string.IsNullOrWhiteSpace(MasterWrapper.GetSummonerID(cbSumm.Text))) {
                     errorList.Add("BLUE " + role.ToString());
                 }
             }
-            foreach (Role role in RedSummDict.Keys) {
-                ComboBox tb = RedSummDict[role];
-                if (string.IsNullOrWhiteSpace(MasterWrapper.GetSummonerID(tb.Text))) {
+            foreach (Role role in RedCBSummDict.Keys) {
+                ComboBox cbSumm = RedCBSummDict[role];
+                if (string.IsNullOrWhiteSpace(MasterWrapper.GetSummonerID(cbSumm.Text))) {
                     errorList.Add("RED " + role.ToString());
                 }
             }
@@ -165,6 +181,13 @@ namespace LoLStatsAPIv4_GUI {
             }
             ButtonPressed = true;
             this.Close();
+        }
+
+        private void button_EditNames_Click(object sender, EventArgs e) {
+            using (var form = new EditTeamListForm()) {
+                form.OpenWindow(competitionName);
+            }
+            FillSummonerNames();
         }
     }
 }

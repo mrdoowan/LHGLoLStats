@@ -69,21 +69,21 @@ namespace LoLStatsAPIv4_GUI {
         public int XPDiff15 { get; private set; }
         public int JungleCSAt15 { get; private set; }
         public int JungleCSDiff15 { get; private set; }
-        public int CSAt25 { get; private set; }
-        public int CSDiff25 { get; private set; }
-        public int GoldAt25 { get; private set; }
-        public int GoldDiff25 { get; private set; }
-        public int XPAt25 { get; private set; }
-        public int XPDiff25 { get; private set; }
-        public long DoubleKills { get; private set; }
-        public long TripleKills { get; private set; }
-        public long QuadraKills { get; private set; }
-        public long PentaKills { get; private set; }
+        public int? CSAt25 { get; private set; }
+        public int? CSDiff25 { get; private set; }
+        public int? GoldAt25 { get; private set; }
+        public int? GoldDiff25 { get; private set; }
+        public int? XPAt25 { get; private set; }
+        public int? XPDiff25 { get; private set; }
+        private long DoubleKills;
+        private long TripleKills;
+        private long QuadraKills;
+        private long PentaKills;
         public long GetDoubleKills() {
-            return DoubleKills - TripleKills - QuadraKills - PentaKills;
+            return DoubleKills - TripleKills;
         }
         public long GetTripleKills() {
-            return TripleKills - QuadraKills - PentaKills;
+            return TripleKills - QuadraKills;
         }
         public long GetQuadraKills() {
             return QuadraKills - PentaKills;
@@ -94,12 +94,12 @@ namespace LoLStatsAPIv4_GUI {
 
         public void InitializeClass(Participant playerObj, ParticipantFrame frameAt15,
             ParticipantFrame frameAt25, decimal matchDuration) {
-            var ptlObj = playerObj.Timeline;
-            Role = (ptlObj.Lane == "TOP") ? Role.TOP :
-                (ptlObj.Lane == "JUNGLE") ? Role.JUNGLE :
-                (ptlObj.Lane == "MIDDLE") ? Role.MIDDLE :
-                (ptlObj.Lane == "BOTTOM" && ptlObj.Role == "DUO_CARRY") ? Role.BOTTOM :
-                (ptlObj.Lane == "BOTTOM" && ptlObj.Role == "DUO_SUPPORT") ? Role.SUPPORT : Role.NONE;
+            var pTimelineObj = playerObj.Timeline;
+            Role = (pTimelineObj.Lane == "TOP") ? Role.TOP :
+                (pTimelineObj.Lane == "JUNGLE") ? Role.JUNGLE :
+                (pTimelineObj.Lane == "MIDDLE") ? Role.MIDDLE :
+                (pTimelineObj.Lane == "BOTTOM" && pTimelineObj.Role == "DUO_CARRY") ? Role.BOTTOM :
+                (pTimelineObj.Lane == "BOTTOM" && pTimelineObj.Role == "DUO_SUPPORT") ? Role.SUPPORT : Role.NONE;
 
             var playerStats = playerObj.Stats;
 
@@ -112,9 +112,9 @@ namespace LoLStatsAPIv4_GUI {
             GoldAt15 = frameAt15.TotalGold;
             XPAt15 = frameAt15.XP;
             JungleCSAt15 = frameAt15.JungleMinionsKilled;
-            CSAt25 = frameAt25.MinionsKilled + frameAt25.JungleMinionsKilled;
-            GoldAt25 = frameAt25.TotalGold;
-            XPAt25 = frameAt25.XP;
+            CSAt25 = (frameAt25 == null) ? (int?)null : frameAt25.MinionsKilled + frameAt25.JungleMinionsKilled;
+            GoldAt25 = (frameAt25 == null) ? (int?)null : frameAt25.TotalGold;
+            XPAt25 = (frameAt25 == null) ? (int?)null : frameAt25.XP;
             Kills = playerStats.Kills;
             Deaths = playerStats.Deaths;
             Assists = playerStats.Assists;
@@ -138,9 +138,9 @@ namespace LoLStatsAPIv4_GUI {
             GoldDiff15 = GoldAt15 - oppPlayer.GoldAt15;
             XPDiff15 = XPAt15 - oppPlayer.XPAt15;
             JungleCSDiff15 = JungleCSAt15 - oppPlayer.JungleCSAt15;
-            CSDiff25 = CSAt25 - oppPlayer.CSAt25;
-            GoldDiff25 = GoldAt25 - oppPlayer.GoldAt25;
-            XPDiff25 = XPAt25 - oppPlayer.XPAt25;
+            CSDiff25 = (CSAt25 == null) ? null : CSAt25 - oppPlayer.CSAt25;
+            GoldDiff25 = (GoldAt25 == null ) ? null : GoldAt25 - oppPlayer.GoldAt25;
+            XPDiff25 = (XPAt25 == null) ? null : XPAt25 - oppPlayer.XPAt25;
         }
     }
 }
