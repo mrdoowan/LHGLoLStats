@@ -15,6 +15,9 @@ namespace LoLStatsAPIv4_GUI {
         public MainForm() {
             InitializeComponent();
 
+            textBox_ConnectionString.Text = Properties.Settings.Default.ConnectionString;
+            textBox_apiKey.Text = Properties.Settings.Default.APIKey;
+
             try { MasterWrapper.UpdateAPIDevInstance(textBox_apiKey.Text); } catch { }
             MasterWrapper.UpdateConnectionString(textBox_ConnectionString.Text);
 
@@ -69,6 +72,12 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         #endregion
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
+            Properties.Settings.Default.ConnectionString = textBox_ConnectionString.Text;
+            Properties.Settings.Default.APIKey = textBox_apiKey.Text;
+            Properties.Settings.Default.Save();
+        }
 
         private void textBox_ConnectionString_TextChanged(object sender, EventArgs e) {
             MasterWrapper.UpdateConnectionString(textBox_ConnectionString.Text);
@@ -176,5 +185,6 @@ namespace LoLStatsAPIv4_GUI {
             richTextBox_Log.Text = LogClass.GetReport();
             MessageBox.Show("Gasp. Bug fixed!", "Yay", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
     }
 }

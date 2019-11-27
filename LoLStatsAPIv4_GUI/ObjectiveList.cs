@@ -10,12 +10,15 @@ using System.Collections;
 namespace LoLStatsAPIv4_GUI {
     public class ObjectiveList : IEnumerable {
 
-        // Consts
-        private const double BARON_DURATION = 3.5;  // in Minutes
+        private const string PATCH_BARON_DURATION = "9.23";
+        // Becomes 3 minutes at this patch, 3.5 minutes before it
+        private const double OLD_BARON_DURATION = 3.5;
+        private const double CURRENT_BARON_DURATION = 3.0;
 
         // Private member variables
         private Dictionary<ObjectiveEvent, List<int>> EventIdx; // Cancer
         private List<Objective> Objectives;
+        private double BaronDuration;  // in Minutes
 
         #region DB Columns for Team
 
@@ -40,6 +43,24 @@ namespace LoLStatsAPIv4_GUI {
                 { ObjectiveEvent.INHIBITOR_DESTROYED, new List<int>() }
             };
             Objectives = new List<Objective>();
+        }
+
+        public void UpdateBaronDuration(string thisPatch) {
+            BaronDuration = (IsPatch1LaterThanPatch2(thisPatch, PATCH_BARON_DURATION)) ? CURRENT_BARON_DURATION : OLD_BARON_DURATION;
+        }
+
+        // Assumption is that patch1 and patch2 are formatted in "##.##"
+        private bool IsPatch1LaterThanPatch2(string patch1, string patch2) {
+            string[] patch1Arr = patch1.Split('.');
+            string[] patch2Arr = patch2.Split('.');
+            int season1 = Convert.ToInt32(patch1Arr[0]);
+            int season2 = Convert.ToInt32(patch2Arr[0]);
+            int version1 = Convert.ToInt32(patch1Arr[1]);
+            int version2 = Convert.ToInt32(patch2Arr[1]);
+
+            if (season1 < season2) { return false; }
+            else if (season1 > season2) { return true; }
+            return (version1 >= version2) ? true : false;
         }
 
         // Index overwrite
@@ -152,7 +173,7 @@ namespace LoLStatsAPIv4_GUI {
                 int? teamGoldAtKill = TeamGoldAtTimeStamp(tsAtKill, frameList, teamPartIds);
                 int? oppGoldAtKill = TeamGoldAtTimeStamp(tsAtKill, frameList, oppPartIds);
                 if (teamGoldAtKill == null || oppGoldAtKill == null) { continue; }
-                TimeSpan tsAtExpire = tsAtKill + TimeSpan.FromMinutes(BARON_DURATION);
+                TimeSpan tsAtExpire = tsAtKill + TimeSpan.FromMinutes(BaronDuration);
                 int? teamGoldAtExpire = TeamGoldAtTimeStamp(tsAtExpire, frameList, teamPartIds);
                 int? oppGoldAtExpire = TeamGoldAtTimeStamp(tsAtExpire, frameList, oppPartIds);
                 if (teamGoldAtExpire == null || oppGoldAtExpire == null) { continue; }

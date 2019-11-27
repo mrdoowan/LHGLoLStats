@@ -55,7 +55,8 @@ namespace LoLStatsAPIv4_GUI {
                     var list = teamList[oldName];
                     teamList.Remove(oldName);
                     teamList.Add(editedName, list);
-                    listBox_Teams.SelectedItem = editedName;
+                    int index = listBox_Summoners.Items.IndexOf(oldName);
+                    listBox_Teams.Items[index] = editedName;
                 }
             }
         }
@@ -65,6 +66,10 @@ namespace LoLStatsAPIv4_GUI {
             if (listBox_Teams.SelectedIndices.Count > 0) {
                 string teamName = listBox_Teams.SelectedItem.ToString();
                 string addSummoner = Interaction.InputBox("Add Summoner:");
+                if (teamList[teamName].Contains(addSummoner)) {
+                    MessageBox.Show("Summoner already exists in the team!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
                 string retSummName = MasterWrapper.AddSummonerIntoDBAndCache(competitionName, teamName, addSummoner);
                 if (retSummName == null) { 
                     return; 
@@ -80,6 +85,7 @@ namespace LoLStatsAPIv4_GUI {
                     teamList[teamName].Add(addSummoner);
                     int index = listBox_Summoners.Items.IndexOf(retSummName);
                     listBox_Summoners.Items[index] = addSummoner;
+                    MessageBox.Show("Summoner \"" + retSummName + "\" changed name to \"" + addSummoner + "\"", "Name Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             else {

@@ -118,7 +118,7 @@ namespace LoLStatsAPIv4_GUI {
 
         #endregion
 
-        public void InitializeClass(TeamStats teamObj, int teamId, int duration) {
+        public void InitializeClass(TeamStats teamObj, int teamId, int duration, string patch) {
             TeamId = teamId;
             long seconds = duration % 60;
             MinuteDuration = (duration / 60) + ((decimal)seconds / 60);
@@ -128,6 +128,7 @@ namespace LoLStatsAPIv4_GUI {
             FirstDragon = teamObj.FirstDragon;
             FirstRiftHerald = teamObj.FirstRiftHerald;
             Bans = GetTeamBans(teamObj.Bans);
+            Objectives.UpdateBaronDuration(patch); 
         }
 
         public void AddPlayer(Participant playerObj, List<MatchFrame> frameMinutes) {

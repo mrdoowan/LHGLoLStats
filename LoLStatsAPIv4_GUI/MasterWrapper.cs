@@ -296,17 +296,6 @@ namespace LoLStatsAPIv4_GUI {
             var readConds = new Dictionary<string, Tuple<DB, string>>();
             readConds.Add(C_COMPID, new Tuple<DB, string>(DB.WHERE, compID.ToString()));
             readConds.Add(C_SUMMID, new Tuple<DB, string>(DB.WHERE, summId));
-            var listDict = DBWrapper.DBReadFromTable(T_REGISTEREDPLAYERS, readConds);
-            if (listDict.Count > 0) {
-                var sb = new StringBuilder();
-                sb.AppendLine("This summoner already exists in the competition in the following teams!");
-                foreach (var objDict in listDict) {
-                    int teamId = Convert.ToInt32(objDict[C_TEAMID]);
-                    sb.AppendLine(cacheTeam.Reverse[teamId]);
-                }
-                MessageBox.Show(sb.ToString(), "Hold On", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
             readConds.Add(C_TEAMID, new Tuple<DB, string>(DB.WHERE, teamID.ToString()));
             if (!DBWrapper.DBTableHasEntry(T_REGISTEREDPLAYERS, readConds)) {
                 var insertComp = new Dictionary<string, Tuple<DB, string>>();
@@ -315,7 +304,6 @@ namespace LoLStatsAPIv4_GUI {
                 insertComp.Add(C_TEAMID, new Tuple<DB, string>(DB.INSERT, teamID.ToString()));
                 DBWrapper.DBInsertIntoTable(T_REGISTEREDPLAYERS, insertComp);
             }
-
             return retName;
         }
 

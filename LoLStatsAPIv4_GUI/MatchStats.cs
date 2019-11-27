@@ -67,30 +67,30 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         // Helper function for both InitializeClassWith or WithoutWindow
-        private void InitializeMatchInstance(Match matchObj, MatchTimeline timelineObj, int blueTeamId, int redTeamId,
+        private void InitializeMatchInstance(Match matchObject, MatchTimeline timelineObject, int blueTeamId, int redTeamId,
             Dictionary<Role, Tuple<string, int>> blueTeamDict, Dictionary<Role, Tuple<string, int>> redTeamDict) {
-            MatchID = matchObj.GameId;
-            Duration = matchObj.GameDuration;
-            MatchCreation = matchObj.GameCreation;
-            Patch = matchObj.GameVersion;
+            MatchID = matchObject.GameId;
+            Duration = matchObject.GameDuration;
+            MatchCreation = matchObject.GameCreation;
+            Patch = matchObject.GameVersion;
 
-            foreach (var teamObj in matchObj.Teams) {
-                if (teamObj.TeamId == MasterWrapper.BLUE_ID) {
-                    BlueTeam.InitializeClass(teamObj, blueTeamId, GetDurationSeconds());
+            foreach (var teamObject in matchObject.Teams) {
+                if (teamObject.TeamId == MasterWrapper.BLUE_ID) {
+                    BlueTeam.InitializeClass(teamObject, blueTeamId, GetDurationSeconds(), GetPatch());
                 }
                 else {
-                    RedTeam.InitializeClass(teamObj, redTeamId, GetDurationSeconds());
+                    RedTeam.InitializeClass(teamObject, redTeamId, GetDurationSeconds(), GetPatch());
                 }
             }
-            foreach (var playerObj in matchObj.Participants) {
-                if (playerObj.TeamId == MasterWrapper.BLUE_ID) {
-                    BlueTeam.AddPlayer(playerObj, timelineObj.Frames);
+            foreach (var playerObject in matchObject.Participants) {
+                if (playerObject.TeamId == MasterWrapper.BLUE_ID) {
+                    BlueTeam.AddPlayer(playerObject, timelineObject.Frames);
                 }
                 else {
-                    RedTeam.AddPlayer(playerObj, timelineObj.Frames);
+                    RedTeam.AddPlayer(playerObject, timelineObject.Frames);
                 }
             }
-            foreach (var matchFrame in timelineObj.Frames) {
+            foreach (var matchFrame in timelineObject.Frames) {
                 foreach (var matchEvent in matchFrame.Events) {
                     if (BlueTeam.ParticipantIds.Contains(matchEvent.KillerId.ToString())) {
                         BlueTeam.AddObjective(matchEvent);
@@ -104,8 +104,8 @@ namespace LoLStatsAPIv4_GUI {
             BlueTeam.SetObjectiveDiffs(RedTeam.Objectives);
             RedTeam.SetObjectiveDiffs(BlueTeam.Objectives);
             // Set Baron Power Play
-            BlueTeam.UpdateBaronPowerPlay(timelineObj.Frames, RedTeam.ParticipantIds);
-            RedTeam.UpdateBaronPowerPlay(timelineObj.Frames, BlueTeam.ParticipantIds);
+            BlueTeam.UpdateBaronPowerPlay(timelineObject.Frames, RedTeam.ParticipantIds);
+            RedTeam.UpdateBaronPowerPlay(timelineObject.Frames, BlueTeam.ParticipantIds);
             // Lastly, if editing a Match, initialize with champID and summonerID
             BlueTeam.SetPlayerIDs(blueTeamDict);
             RedTeam.SetPlayerIDs(redTeamDict);
