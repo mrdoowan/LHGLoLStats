@@ -43,9 +43,9 @@
             // 
             // button_OK
             // 
-            this.button_OK.Location = new System.Drawing.Point(370, 12);
+            this.button_OK.Location = new System.Drawing.Point(392, 12);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(81, 71);
+            this.button_OK.Size = new System.Drawing.Size(81, 72);
             this.button_OK.TabIndex = 22;
             this.button_OK.Text = "OK";
             this.button_OK.UseVisualStyleBackColor = true;
@@ -64,7 +64,7 @@
             // 
             this.textBox_MatchId.Location = new System.Drawing.Point(118, 63);
             this.textBox_MatchId.Name = "textBox_MatchId";
-            this.textBox_MatchId.Size = new System.Drawing.Size(246, 20);
+            this.textBox_MatchId.Size = new System.Drawing.Size(268, 20);
             this.textBox_MatchId.TabIndex = 26;
             // 
             // label2
@@ -82,7 +82,7 @@
             this.comboBox_BlueTeamName.FormattingEnabled = true;
             this.comboBox_BlueTeamName.Location = new System.Drawing.Point(118, 11);
             this.comboBox_BlueTeamName.Name = "comboBox_BlueTeamName";
-            this.comboBox_BlueTeamName.Size = new System.Drawing.Size(246, 21);
+            this.comboBox_BlueTeamName.Size = new System.Drawing.Size(268, 21);
             this.comboBox_BlueTeamName.TabIndex = 27;
             // 
             // comboBox_RedTeamName
@@ -91,14 +91,14 @@
             this.comboBox_RedTeamName.FormattingEnabled = true;
             this.comboBox_RedTeamName.Location = new System.Drawing.Point(118, 37);
             this.comboBox_RedTeamName.Name = "comboBox_RedTeamName";
-            this.comboBox_RedTeamName.Size = new System.Drawing.Size(246, 21);
+            this.comboBox_RedTeamName.Size = new System.Drawing.Size(268, 21);
             this.comboBox_RedTeamName.TabIndex = 28;
             // 
             // LoadMatchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(462, 93);
+            this.ClientSize = new System.Drawing.Size(485, 94);
             this.Controls.Add(this.comboBox_RedTeamName);
             this.Controls.Add(this.comboBox_BlueTeamName);
             this.Controls.Add(this.textBox_MatchId);

@@ -26,7 +26,11 @@ namespace LoLStatsAPIv4_GUI {
             comboBox_RedTeamName.Items.AddRange(teamNamesArr);
             this.ShowDialog();
             if (pressed) {
-                return MasterWrapper.LoadNewMatchStatsIntoDB(matchId, compName, comboBox_BlueTeamName.Text, comboBox_RedTeamName.Text);
+                return MasterWrapper.LoadNewMatchStatsIntoDB(
+                    matchId, 
+                    compName, 
+                    comboBox_BlueTeamName.Text, 
+                    comboBox_RedTeamName.Text);
             }
             return null;
         }

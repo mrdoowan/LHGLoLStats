@@ -105,7 +105,6 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         private void button_EditMatchRoles_Click(object sender, EventArgs e) {
-            // Currently does nothing heehee xd
             if (AreMainFieldsEmpty()) { return; }
 
             if (string.IsNullOrWhiteSpace(comboBox_MatchId.Text)) {
@@ -177,13 +176,16 @@ namespace LoLStatsAPIv4_GUI {
             if (AreMainFieldsEmpty()) { return; }
 
             MessageBox.Show("No bugs to fix!", "Nothing", MessageBoxButtons.OK, MessageBoxIcon.Information); return;
-
+            
+            /*
             LogClass.ClearLog();
             if (!MasterWrapper.ArbitraryBugFix()) {
                 MessageBox.Show("Error happened :(", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
             richTextBox_Log.Text = LogClass.GetReport();
             MessageBox.Show("Gasp. Bug fixed!", "Yay", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            */
         }
 
     }

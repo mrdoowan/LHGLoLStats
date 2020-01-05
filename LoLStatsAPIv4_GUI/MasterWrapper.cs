@@ -60,6 +60,7 @@ namespace LoLStatsAPIv4_GUI {
         private const string C_DURATION = "duration";
         private const string C_PATCH = "patch";
         private const string C_CREATION = "dateCreated";
+        private const string C_GAMENUM = "gameNumber";
         // BannedChamps
         private const string C_TEAMBANID = "teamBanID";
         private const string C_TEAMBANNEDID = "teamBannedAgainstID";
@@ -76,8 +77,8 @@ namespace LoLStatsAPIv4_GUI {
         private const string C_KDA = "KDA";
         private const string C_KILLP = "killParticipation";
         private const string C_DEATHP = "deathParticipation";
-        private const string C_DMGDEALTCHAMPS = "dmgDealtChampsPerMin";
-        private const string C_DMGDEALTOBJ = "dmgDealtObjectivesPerMin";
+        private const string C_DMGDEALTCHMPSPERMIN = "dmgDealtChampsPerMin";
+        private const string C_DMGDEALTOBJPERMIN = "dmgDealtObjectivesPerMin";
         private const string C_DMGTAKEN = "dmgTakenPerMin";
         private const string C_GOLDPERMIN = "goldPerMin";
         private const string C_CSPERMIN = "csPerMin";
@@ -102,6 +103,8 @@ namespace LoLStatsAPIv4_GUI {
         private const string C_KILLS = "kills";
         private const string C_DEATHS = "deaths";
         private const string C_ASSISTS = "assists";
+        private const string C_DMGDEALTCHAMPS = "dmgDealtChamps";
+        private const string C_GOLD = "gold";
         private const string C_CREEPSCORE = "creepScore";
         private const string C_VISIONSCORE = "visionScore";
         private const string C_DKILL = "doubleKills";
@@ -123,6 +126,10 @@ namespace LoLStatsAPIv4_GUI {
         private const string C_TOTKILLS = "totalKills";
         private const string C_TOTDEATHS = "totalDeaths";
         private const string C_TOTASSISTS = "totalAssists";
+        private const string C_TOTDMGDEALTCHAMPS = "totalDmgDealtChamps";
+        private const string C_TOTGOLD = "totalGold";
+        private const string C_TOTCS = "totalCreepScore";
+        private const string C_TOTVS = "totalVisionScore";
 
         #endregion
 
@@ -370,7 +377,7 @@ namespace LoLStatsAPIv4_GUI {
             MatchTimeline matchTimelineObj = matchTuple.Item2;
             int blueTeamID = GetTeamID(blueTeamName);
             int redTeamID = GetTeamID(redTeamName);
-            MatchStats match = new MatchStats(cacheComp.Forward[compName], compName);
+            MatchStats match = new MatchStats(cacheComp.Forward[compName], compName, 0);
             if (!match.InitializeClassWithWindow(matchInfoObj, matchTimelineObj, blueTeamID, redTeamID)) {
                 return null;
             }
@@ -392,6 +399,7 @@ namespace LoLStatsAPIv4_GUI {
             int compID = Convert.ToInt32(matchDBObj[C_COMPID]);
             int blueTeamID = Convert.ToInt32(matchDBObj[C_BLUETEAMID]);
             int redTeamID = Convert.ToInt32(matchDBObj[C_REDTEAMID]);
+            int gameNumber = Convert.ToInt32(matchDBObj[C_GAMENUM]);
             var blueTeamDict = GetTeamDictFromDB(matchID, blueTeamID);
             var redTeamDict = GetTeamDictFromDB(matchID, redTeamID);
 
@@ -399,7 +407,7 @@ namespace LoLStatsAPIv4_GUI {
             if (matchTuple == null) { return null; }
             Match matchInfoObj = matchTuple.Item1;
             MatchTimeline matchTimelineObj = matchTuple.Item2;
-            MatchStats match = new MatchStats(compID, cacheComp.Reverse[compID]);
+            MatchStats match = new MatchStats(compID, cacheComp.Reverse[compID], gameNumber);
             if (!match.InitializeClassWithWindow(matchInfoObj, matchTimelineObj, blueTeamID, redTeamID, blueTeamDict, redTeamDict)) {
                 return null;
             }
@@ -422,6 +430,7 @@ namespace LoLStatsAPIv4_GUI {
                 int compId = Convert.ToInt32(matchObj[C_COMPID]);
                 int blueTeamId = Convert.ToInt32(matchObj[C_BLUETEAMID]);
                 int redTeamId = Convert.ToInt32(matchObj[C_REDTEAMID]);
+                int gameNum = Convert.ToInt32(matchObj[C_GAMENUM]);
                 long matchId = Convert.ToInt64(matchObj[C_ID]);
                 var blueTeamDict = GetTeamDictFromDB(matchId, blueTeamId);
                 var redTeamDict = GetTeamDictFromDB(matchId, redTeamId);
@@ -430,27 +439,52 @@ namespace LoLStatsAPIv4_GUI {
                 if (matchTuple == null) { return false; }
                 Match matchInfoObj = matchTuple.Item1;
                 MatchTimeline matchTimelineObj = matchTuple.Item2;
-                MatchStats matchInst = new MatchStats(compId, cacheComp.Reverse[compId]);
+                MatchStats matchInst = new MatchStats(compId, cacheComp.Reverse[compId], gameNum);
                 matchInst.InitializeClassWithoutWindow(matchInfoObj, matchTimelineObj, blueTeamId, redTeamId, blueTeamDict, redTeamDict);
 
                 // EDIT-ABLE ONLY FOR BUG FIXES
-                // Update TeamStats KDA and goldDiff15
-                foreach (Player player in matchInst.BlueTeam.Players) {
+                // Update PlayerStats: dmgDealtChamps, gold
+                // Update TeamStats: csPerMin, totalDmgDealtChamps, totalGold, totalCreepScore, totalVisionScore
+                Team blueTeam = matchInst.BlueTeam;
+                Team redTeam = matchInst.RedTeam;
+                // Blue Players
+                foreach (Player player in blueTeam.Players) {
                     var columns = new Dictionary<string, Tuple<DB, string>>();
 
                     columns.Add(C_MATCHID, new Tuple<DB, string>(DB.WHERE, matchId.ToString()));
                     columns.Add(C_SUMMID, new Tuple<DB, string>(DB.WHERE, player.SummonerId.ToString()));
-                    columns.Add(C_VISIONSCORE, new Tuple<DB, string>(DB.SET, player.VisionScore.ToString()));
+                    columns.Add(C_DMGDEALTCHAMPS, new Tuple<DB, string>(DB.SET, player.DamageToChamps.ToString()));
+                    columns.Add(C_GOLD, new Tuple<DB, string>(DB.SET, player.Gold.ToString()));
                     DBWrapper.DBUpdateTable(T_PLAYERSTATS, columns);
                 }
-                foreach (Player player in matchInst.RedTeam.Players) {
+                // Red Players
+                foreach (Player player in redTeam.Players) {
                     var columns = new Dictionary<string, Tuple<DB, string>>();
 
                     columns.Add(C_MATCHID, new Tuple<DB, string>(DB.WHERE, matchId.ToString()));
                     columns.Add(C_SUMMID, new Tuple<DB, string>(DB.WHERE, player.SummonerId.ToString()));
-                    columns.Add(C_VISIONSCORE, new Tuple<DB, string>(DB.SET, player.VisionScore.ToString()));
+                    columns.Add(C_DMGDEALTCHAMPS, new Tuple<DB, string>(DB.SET, player.DamageToChamps.ToString()));
+                    columns.Add(C_GOLD, new Tuple<DB, string>(DB.SET, player.Gold.ToString()));
                     DBWrapper.DBUpdateTable(T_PLAYERSTATS, columns);
                 }
+                var teamCols = new Dictionary<string, Tuple<DB, string>>();
+                // Blue Team
+                teamCols.Add(C_MATCHID, new Tuple<DB, string>(DB.WHERE, matchId.ToString()));
+                teamCols.Add(C_TEAMID, new Tuple<DB, string>(DB.WHERE, blueTeam.TeamId.ToString()));
+                teamCols.Add(C_CSPERMIN, new Tuple<DB, string>(DB.SET, blueTeam.GetCreepScorePerMinute().ToString()));
+                teamCols.Add(C_TOTDMGDEALTCHAMPS, new Tuple<DB, string>(DB.SET, blueTeam.GetTotalDamageToChamps().ToString()));
+                teamCols.Add(C_TOTGOLD, new Tuple<DB, string>(DB.SET, blueTeam.GetTotalGold().ToString()));
+                teamCols.Add(C_TOTCS, new Tuple<DB, string>(DB.SET, blueTeam.GetTotalCreepScore().ToString()));
+                teamCols.Add(C_TOTVS, new Tuple<DB, string>(DB.SET, blueTeam.GetTotalVisionScore().ToString()));
+                DBWrapper.DBUpdateTable(T_TEAMSTATS, teamCols);
+                // Red Team
+                teamCols[C_TEAMID] = new Tuple<DB, string>(DB.WHERE, redTeam.TeamId.ToString());
+                teamCols[C_CSPERMIN] = new Tuple<DB, string>(DB.SET, redTeam.GetCreepScorePerMinute().ToString());
+                teamCols[C_TOTDMGDEALTCHAMPS] = new Tuple<DB, string>(DB.SET, redTeam.GetTotalDamageToChamps().ToString());
+                teamCols[C_TOTGOLD] = new Tuple<DB, string>(DB.SET, redTeam.GetTotalGold().ToString());
+                teamCols[C_TOTCS] = new Tuple<DB, string>(DB.SET, redTeam.GetTotalCreepScore().ToString());
+                teamCols[C_TOTVS] = new Tuple<DB, string>(DB.SET, redTeam.GetTotalVisionScore().ToString());
+                DBWrapper.DBUpdateTable(T_TEAMSTATS, teamCols);
             }
             return true;
         }
@@ -474,6 +508,7 @@ namespace LoLStatsAPIv4_GUI {
             columns.Add(C_DURATION, match.GetDurationSeconds());
             columns.Add(C_PATCH, match.GetPatch());
             columns.Add(C_CREATION, match.MatchCreation);
+            columns.Add(C_GAMENUM, match.GameNumber);
             InsertUltimateHelper(T_MATCHES, columns);
         }
 
@@ -526,8 +561,8 @@ namespace LoLStatsAPIv4_GUI {
                 columns.Add(C_KDA, (player.GetKDA() == -1) ? "Perfect" : SigFigs(player.GetKDA()));
                 columns.Add(C_KILLP, SigFigs(player.GetKillParticipation(team.GetTotalKills())));
                 columns.Add(C_DEATHP, SigFigs(player.GetDeathParticipation(team.GetTotalDeaths())));
-                columns.Add(C_DMGDEALTCHAMPS, SigFigs(player.GetDamageToChampsPerMinute()));
-                columns.Add(C_DMGDEALTOBJ, SigFigs(player.GetDamageToObjectivesPerMinute()));
+                columns.Add(C_DMGDEALTCHMPSPERMIN, SigFigs(player.GetDamageToChampsPerMinute()));
+                columns.Add(C_DMGDEALTOBJPERMIN, SigFigs(player.GetDamageToObjectivesPerMinute()));
                 columns.Add(C_DMGTAKEN, SigFigs(player.GetDamageTakenPerMinute()));
                 columns.Add(C_GOLDPERMIN, SigFigs(player.GetGoldPerMinute()));
                 columns.Add(C_CSPERMIN, SigFigs(player.GetCSPerMinute()));
@@ -552,6 +587,8 @@ namespace LoLStatsAPIv4_GUI {
                 columns.Add(C_KILLS, player.Kills);
                 columns.Add(C_DEATHS, player.Deaths);
                 columns.Add(C_ASSISTS, player.Assists);
+                columns.Add(C_DMGDEALTCHAMPS, player.DamageToChamps);
+                columns.Add(C_GOLD, player.Gold);
                 columns.Add(C_CREEPSCORE, player.CreepScore);
                 columns.Add(C_VISIONSCORE, player.VisionScore);
                 columns.Add(C_DKILL, player.GetDoubleKills());
@@ -570,9 +607,10 @@ namespace LoLStatsAPIv4_GUI {
             else { columns.Add(C_SIDE, "RED"); }
             columns.Add(C_WIN, team.Win);
             columns.Add(C_KDA, (team.GetTotalKDA() == -1) ? "Perfect" : SigFigs(team.GetTotalKDA()));
-            columns.Add(C_DMGDEALTCHAMPS, SigFigs(team.GetDamageToChampsPerMinute()));
-            columns.Add(C_DMGDEALTOBJ, SigFigs(team.GetDamageToObjectivesPerMinute()));
+            columns.Add(C_DMGDEALTCHMPSPERMIN, SigFigs(team.GetDamageToChampsPerMinute()));
+            columns.Add(C_DMGDEALTOBJPERMIN, SigFigs(team.GetDamageToObjectivesPerMinute()));
             columns.Add(C_GOLDPERMIN, SigFigs(team.GetGoldPerMinute()));
+            columns.Add(C_CSPERMIN, SigFigs(team.GetCreepScorePerMinute()));
             columns.Add(C_VSPERMIN, SigFigs(team.GetVisionScorePerMinute()));
             columns.Add(C_FBLOOD, team.FirstBlood);
             columns.Add(C_FTOWER, team.FirstTower);
@@ -597,6 +635,10 @@ namespace LoLStatsAPIv4_GUI {
             columns.Add(C_TOTKILLS, team.GetTotalKills());
             columns.Add(C_TOTDEATHS, team.GetTotalDeaths());
             columns.Add(C_TOTASSISTS, team.GetTotalAssists());
+            columns.Add(C_TOTDMGDEALTCHAMPS, team.GetTotalDamageToChamps());
+            columns.Add(C_TOTGOLD, team.GetTotalGold());
+            columns.Add(C_TOTCS, team.GetTotalCreepScore());
+            columns.Add(C_TOTVS, team.GetTotalVisionScore());
             InsertUltimateHelper(T_TEAMSTATS, columns);
         }
 

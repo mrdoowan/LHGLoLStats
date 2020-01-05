@@ -57,12 +57,13 @@ namespace LoLStatsAPIv4_GUI {
             };
         }
 
-        public Dictionary<int, PlayerList> OpenWindow(string compName, Team blueTeam, Team redTeam) {
+        public Dictionary<int, PlayerList> OpenWindow(string compName, Team blueTeam, Team redTeam, int ogGameNum, out int gameNumber) {
             competitionName = compName;
             blueTeamName = MasterWrapper.GetTeamName(blueTeam.TeamId);
             redTeamName = MasterWrapper.GetTeamName(redTeam.TeamId);
             groupBox_BlueTeam.Text = "BLUE TEAM [" + blueTeamName + "]";
             groupBox_RedTeam.Text = "RED TEAM [" + redTeamName + "]";
+            numericUpDown_GameNumber.Value = ogGameNum;
             var blueTeamPlayers = blueTeam.Players;
             var redTeamPlayers = redTeam.Players;
             
@@ -101,6 +102,7 @@ namespace LoLStatsAPIv4_GUI {
             richTextBox_RedWarning.Text = WarningMessage(redTeam.Players.GetUnassignedRoles());
 
             this.ShowDialog();
+            gameNumber = (int)numericUpDown_GameNumber.Value;
             if (ButtonPressed) {
                 var output = new Dictionary<int, PlayerList>();
                 foreach (Role role in BlueCBChampDict.Keys) {
@@ -154,6 +156,9 @@ namespace LoLStatsAPIv4_GUI {
 
         private void button_Save_Click(object sender, EventArgs e) {
             var errorList = new List<string>();
+            if (numericUpDown_GameNumber.Value == 0) {
+                errorList.Add("Game Number needs to be >0.");
+            }
             foreach (Role role in BlueCBSummDict.Keys) {
                 ComboBox cbSumm = BlueCBSummDict[role];
                 ComboBox cbChamp = BlueCBChampDict[role];

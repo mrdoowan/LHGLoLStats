@@ -46,9 +46,9 @@ namespace LoLStatsAPIv4_GUI {
         public decimal GetDamageTakenPerMinute() {
             return Math.Round(DamageTaken / MinuteDuration, 2, MidpointRounding.AwayFromZero);
         }
-        public long TotalGold { get; private set; }
+        public long Gold { get; private set; }
         public decimal GetGoldPerMinute() {
-            return Math.Round(TotalGold / MinuteDuration, 2, MidpointRounding.AwayFromZero);
+            return Math.Round(Gold / MinuteDuration, 2, MidpointRounding.AwayFromZero);
         }
         public long CreepScore { get; private set; }
         public decimal GetCSPerMinute() {
@@ -92,6 +92,7 @@ namespace LoLStatsAPIv4_GUI {
             return PentaKills;
         }
 
+
         public void InitializeClass(Participant playerObj, ParticipantFrame frameAt15,
             ParticipantFrame frameAt25, decimal matchDuration) {
             var pTimelineObj = playerObj.Timeline;
@@ -123,7 +124,7 @@ namespace LoLStatsAPIv4_GUI {
             DamageToChamps = playerStats.TotalDamageDealtToChampions;
             DamageToObjectives = playerStats.DamageDealtToObjectives;
             DamageTaken = playerStats.TotalDamageTaken;
-            TotalGold = playerStats.GoldEarned;
+            Gold = playerStats.GoldEarned;
             CreepScore = playerStats.NeutralMinionsKilled + playerStats.TotalMinionsKilled;
             VisionScore = playerStats.VisionScore;
             DoubleKills = playerStats.DoubleKills;

@@ -83,7 +83,7 @@ namespace LoLStatsAPIv4_GUI {
                     case TeamStat.ASSISTS: val += player.Assists; break;
                     case TeamStat.DAMAGE_CHAMPS: val += player.DamageToChamps; break;
                     case TeamStat.DAMAGE_OBJECTIVES: val += player.DamageToObjectives; break;
-                    case TeamStat.GOLD: val += player.TotalGold; break;
+                    case TeamStat.GOLD: val += player.Gold; break;
                     case TeamStat.CREEP_SCORE: val += player.CreepScore; break;
                     case TeamStat.VISION_SCORE: val += player.VisionScore; break;
                     case TeamStat.GOLD_AT_15: val += player.GoldAt15; break;

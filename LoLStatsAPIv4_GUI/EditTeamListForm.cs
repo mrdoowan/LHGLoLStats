@@ -74,7 +74,7 @@ namespace LoLStatsAPIv4_GUI {
                 if (retSummName == null) { 
                     return; 
                 }
-                else if (addSummoner == retSummName) {
+                else if (addSummoner.ToLower() == retSummName.ToLower()) {
                     // Brand new summoner
                     teamList[teamName].Add(retSummName);
                     listBox_Summoners.Items.Add(retSummName);

@@ -54,15 +54,19 @@
             this.richTextBox_BlueWarning = new System.Windows.Forms.RichTextBox();
             this.richTextBox_RedWarning = new System.Windows.Forms.RichTextBox();
             this.button_EditNames = new System.Windows.Forms.Button();
+            this.numericUpDown_GameNumber = new System.Windows.Forms.NumericUpDown();
+            this.label1 = new System.Windows.Forms.Label();
             this.groupBox_BlueTeam.SuspendLayout();
             this.groupBox_RedTeam.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_GameNumber)).BeginInit();
             this.SuspendLayout();
             // 
             // button_Save
             // 
-            this.button_Save.Location = new System.Drawing.Point(345, 194);
+            this.button_Save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Save.Location = new System.Drawing.Point(345, 221);
             this.button_Save.Name = "button_Save";
-            this.button_Save.Size = new System.Drawing.Size(62, 24);
+            this.button_Save.Size = new System.Drawing.Size(95, 24);
             this.button_Save.TabIndex = 44;
             this.button_Save.Text = "Save";
             this.button_Save.UseVisualStyleBackColor = true;
@@ -70,45 +74,50 @@
             // 
             // label13
             // 
+            this.label13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.label13.Location = new System.Drawing.Point(345, 152);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(62, 23);
+            this.label13.Size = new System.Drawing.Size(95, 23);
             this.label13.TabIndex = 70;
             this.label13.Text = "[Support]";
             this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label14
             // 
+            this.label14.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.label14.Location = new System.Drawing.Point(345, 125);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(62, 23);
+            this.label14.Size = new System.Drawing.Size(95, 23);
             this.label14.TabIndex = 69;
             this.label14.Text = "[Bottom]";
             this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label15
             // 
+            this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.label15.Location = new System.Drawing.Point(345, 98);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(62, 23);
+            this.label15.Size = new System.Drawing.Size(95, 23);
             this.label15.TabIndex = 68;
             this.label15.Text = "[Middle]";
             this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label16
             // 
+            this.label16.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.label16.Location = new System.Drawing.Point(345, 71);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(62, 23);
+            this.label16.Size = new System.Drawing.Size(95, 23);
             this.label16.TabIndex = 67;
             this.label16.Text = "[Jungle]";
             this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label17
             // 
+            this.label17.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.label17.Location = new System.Drawing.Point(345, 44);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(62, 23);
+            this.label17.Size = new System.Drawing.Size(95, 23);
             this.label17.TabIndex = 66;
             this.label17.Text = "[Top]";
             this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -285,6 +294,7 @@
             // 
             // groupBox_RedTeam
             // 
+            this.groupBox_RedTeam.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.groupBox_RedTeam.Controls.Add(this.comboBox_RedSummSupp);
             this.groupBox_RedTeam.Controls.Add(this.comboBox_RedSummBot);
             this.groupBox_RedTeam.Controls.Add(this.comboBox_RedSummMid);
@@ -296,7 +306,7 @@
             this.groupBox_RedTeam.Controls.Add(this.comboBox_RedChampJg);
             this.groupBox_RedTeam.Controls.Add(this.comboBox_RedChampTop);
             this.groupBox_RedTeam.ForeColor = System.Drawing.Color.Red;
-            this.groupBox_RedTeam.Location = new System.Drawing.Point(413, 26);
+            this.groupBox_RedTeam.Location = new System.Drawing.Point(447, 26);
             this.groupBox_RedTeam.Name = "groupBox_RedTeam";
             this.groupBox_RedTeam.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.groupBox_RedTeam.Size = new System.Drawing.Size(327, 162);
@@ -356,41 +366,64 @@
             // 
             // richTextBox_BlueWarning
             // 
+            this.richTextBox_BlueWarning.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.richTextBox_BlueWarning.BackColor = System.Drawing.SystemColors.ControlLight;
             this.richTextBox_BlueWarning.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richTextBox_BlueWarning.Location = new System.Drawing.Point(12, 194);
             this.richTextBox_BlueWarning.Name = "richTextBox_BlueWarning";
             this.richTextBox_BlueWarning.ReadOnly = true;
-            this.richTextBox_BlueWarning.Size = new System.Drawing.Size(327, 36);
+            this.richTextBox_BlueWarning.Size = new System.Drawing.Size(327, 51);
             this.richTextBox_BlueWarning.TabIndex = 88;
             this.richTextBox_BlueWarning.Text = "";
             // 
             // richTextBox_RedWarning
             // 
+            this.richTextBox_RedWarning.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.richTextBox_RedWarning.BackColor = System.Drawing.SystemColors.ControlLight;
             this.richTextBox_RedWarning.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richTextBox_RedWarning.Location = new System.Drawing.Point(413, 194);
+            this.richTextBox_RedWarning.Location = new System.Drawing.Point(447, 194);
             this.richTextBox_RedWarning.Name = "richTextBox_RedWarning";
             this.richTextBox_RedWarning.ReadOnly = true;
-            this.richTextBox_RedWarning.Size = new System.Drawing.Size(327, 36);
+            this.richTextBox_RedWarning.Size = new System.Drawing.Size(327, 51);
             this.richTextBox_RedWarning.TabIndex = 89;
             this.richTextBox_RedWarning.Text = "";
             // 
             // button_EditNames
             // 
-            this.button_EditNames.Location = new System.Drawing.Point(345, 6);
+            this.button_EditNames.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_EditNames.Location = new System.Drawing.Point(345, 12);
             this.button_EditNames.Name = "button_EditNames";
-            this.button_EditNames.Size = new System.Drawing.Size(62, 35);
+            this.button_EditNames.Size = new System.Drawing.Size(95, 29);
             this.button_EditNames.TabIndex = 90;
             this.button_EditNames.Text = "Edit Names";
             this.button_EditNames.UseVisualStyleBackColor = true;
             this.button_EditNames.Click += new System.EventHandler(this.button_EditNames_Click);
             // 
+            // numericUpDown_GameNumber
+            // 
+            this.numericUpDown_GameNumber.Location = new System.Drawing.Point(404, 197);
+            this.numericUpDown_GameNumber.Name = "numericUpDown_GameNumber";
+            this.numericUpDown_GameNumber.Size = new System.Drawing.Size(36, 20);
+            this.numericUpDown_GameNumber.TabIndex = 91;
+            this.numericUpDown_GameNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(345, 194);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(53, 23);
+            this.label1.TabIndex = 92;
+            this.label1.Text = "Game #";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // EditSummonersForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(753, 242);
+            this.ClientSize = new System.Drawing.Size(786, 257);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.numericUpDown_GameNumber);
             this.Controls.Add(this.button_EditNames);
             this.Controls.Add(this.richTextBox_RedWarning);
             this.Controls.Add(this.richTextBox_BlueWarning);
@@ -407,6 +440,7 @@
             this.Text = "EditSummonersForm";
             this.groupBox_BlueTeam.ResumeLayout(false);
             this.groupBox_RedTeam.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_GameNumber)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -443,5 +477,7 @@
         private System.Windows.Forms.RichTextBox richTextBox_BlueWarning;
         private System.Windows.Forms.RichTextBox richTextBox_RedWarning;
         private System.Windows.Forms.Button button_EditNames;
+        private System.Windows.Forms.NumericUpDown numericUpDown_GameNumber;
+        private System.Windows.Forms.Label label1;
     }
 }

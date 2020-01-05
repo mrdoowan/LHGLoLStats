@@ -27,15 +27,17 @@ namespace LoLStatsAPIv4_GUI {
         }
         public Team BlueTeam { get; private set; }  // ID: 100
         public Team RedTeam { get; private set; }   // ID: 200
+        public int GameNumber { get; private set; }
 
         #endregion
 
-        // Ctor
-        public MatchStats(int compID, string compName) {
+        // Ctor w/ gameNum
+        public MatchStats(int compID, string compName, int gameNum) {
             CompetitionID = compID;
             CompetitionName = compName;
             BlueTeam = new Team(MasterWrapper.BLUE_ID);
             RedTeam = new Team(MasterWrapper.RED_ID);
+            GameNumber = gameNum;
         }
 
         // Initialize New Match
@@ -47,7 +49,9 @@ namespace LoLStatsAPIv4_GUI {
 
             // Open Separate Window to finalize the Roles
             using (var editSummForm = new EditSummonersForm()) {
-                var resultTeam = editSummForm.OpenWindow(CompetitionName, BlueTeam, RedTeam);
+                int gameNumOut = GameNumber;
+                var resultTeam = editSummForm.OpenWindow(CompetitionName, BlueTeam, RedTeam, GameNumber, out gameNumOut);
+                GameNumber = gameNumOut;
                 if (resultTeam == null) { return false; }
                 BlueTeam.Players = resultTeam[MasterWrapper.BLUE_ID];
                 RedTeam.Players = resultTeam[MasterWrapper.RED_ID];
@@ -59,11 +63,12 @@ namespace LoLStatsAPIv4_GUI {
         }
 
         // Primarily for bugfixes and if we do not care about Summoner assignments
-        // WARNING: Diffs will NOT be accurate. This is mostly used for bugfixing
+        // WARNING: All Diff stats and GameNumber will be INACCURATE. This is exclusively used for adding extra columns to Tables
         public void InitializeClassWithoutWindow(Match matchObj, MatchTimeline timelineObj, int blueTeamId, int redTeamId,
             Dictionary<Role, Tuple<string, int>> blueTeamDict = null, Dictionary<Role, Tuple<string, int>> redTeamDict = null) {
 
             InitializeMatchInstance(matchObj, timelineObj, blueTeamId, redTeamId, blueTeamDict, redTeamDict);
+
         }
 
         // Helper function for both InitializeClassWith or WithoutWindow

@@ -11,15 +11,6 @@ namespace LoLStatsAPIv4_GUI {
         // Non-DB Columns member variables/Functions
         private decimal MinuteDuration;
         public HashSet<string> ParticipantIds { get; private set; }
-        public int GetTotalKills() {
-            return (int)Players.GetTeamTotalStat(TeamStat.KILLS);
-        }
-        public int GetTotalDeaths() {
-            return (int)Players.GetTeamTotalStat(TeamStat.DEATHS);
-        }
-        public int GetTotalAssists() {
-            return (int)Players.GetTeamTotalStat(TeamStat.ASSISTS);
-        }
 
         // Default Ctor
         public Team(int sideID) {
@@ -50,22 +41,35 @@ namespace LoLStatsAPIv4_GUI {
             decimal totalKDA = (decimal)(totalKills + totalAssists) / totalDeaths;
             return Math.Round(totalKDA, 2, MidpointRounding.AwayFromZero);
         }
-        public decimal GetDamageToChampsPerMinute() {
-            decimal total = Players.GetTeamTotalStat(TeamStat.DAMAGE_CHAMPS);
-            return Math.Round(total / MinuteDuration, 2, MidpointRounding.AwayFromZero);
+        public decimal GetTotalDamageToChamps() {
+            return Players.GetTeamTotalStat(TeamStat.DAMAGE_CHAMPS);
         }
-
+        public decimal GetDamageToChampsPerMinute() {
+            return Math.Round(GetTotalDamageToChamps() / MinuteDuration, 2, MidpointRounding.AwayFromZero);
+        }
+        public decimal GetTotalDamageToObjectives() {
+            return Players.GetTeamTotalStat(TeamStat.DAMAGE_OBJECTIVES);
+        }
         public decimal GetDamageToObjectivesPerMinute() {
-            decimal total = Players.GetTeamTotalStat(TeamStat.DAMAGE_OBJECTIVES);
-            return Math.Round(total / MinuteDuration, 2, MidpointRounding.AwayFromZero);
+            return Math.Round(GetTotalDamageToObjectives() / MinuteDuration, 2, MidpointRounding.AwayFromZero);
+        }
+        public decimal GetTotalGold() {
+            return Players.GetTeamTotalStat(TeamStat.GOLD);
         }
         public decimal GetGoldPerMinute() {
-            decimal total = Players.GetTeamTotalStat(TeamStat.GOLD);
-            return Math.Round(total / MinuteDuration, 2, MidpointRounding.AwayFromZero);
+            return Math.Round(GetTotalGold() / MinuteDuration, 2, MidpointRounding.AwayFromZero);
+        }
+        public decimal GetTotalCreepScore() {
+            return Players.GetTeamTotalStat(TeamStat.CREEP_SCORE);
+        }
+        public decimal GetCreepScorePerMinute() {
+            return Math.Round(GetTotalCreepScore() / MinuteDuration, 2, MidpointRounding.AwayFromZero);
+        }
+        public decimal GetTotalVisionScore() {
+            return Players.GetTeamTotalStat(TeamStat.VISION_SCORE);
         }
         public decimal GetVisionScorePerMinute() {
-            decimal total = Players.GetTeamTotalStat(TeamStat.VISION_SCORE);
-            return Math.Round(total / MinuteDuration, 2, MidpointRounding.AwayFromZero);
+            return Math.Round(GetTotalVisionScore() / MinuteDuration, 2, MidpointRounding.AwayFromZero);
         }
         public int GetGoldAt15() {
             return (int)Players.GetTeamTotalStat(TeamStat.GOLD_AT_15);
@@ -114,6 +118,15 @@ namespace LoLStatsAPIv4_GUI {
         }
         public int? GetKillsDiff25() {
             return (MinuteDuration < MasterWrapper.MINUTE_25) ? (int?)null : Objectives.KillsDiff25;
+        }
+        public int GetTotalKills() {
+            return (int)Players.GetTeamTotalStat(TeamStat.KILLS);
+        }
+        public int GetTotalDeaths() {
+            return (int)Players.GetTeamTotalStat(TeamStat.DEATHS);
+        }
+        public int GetTotalAssists() {
+            return (int)Players.GetTeamTotalStat(TeamStat.ASSISTS);
         }
 
         #endregion
