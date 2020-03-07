@@ -84,7 +84,13 @@ namespace LoLStatsAPIv4_GUI {
                     teamList[teamName].Remove(retSummName);
                     teamList[teamName].Add(addSummoner);
                     int index = listBox_Summoners.Items.IndexOf(retSummName);
-                    listBox_Summoners.Items[index] = addSummoner;
+                    if (index < 0) {
+                        // This is when adding a new summoner, but on a different team
+                        listBox_Summoners.Items.Add(addSummoner);
+                    }
+                    else {
+                        listBox_Summoners.Items[index] = addSummoner;
+                    }
                     MessageBox.Show("Summoner \"" + retSummName + "\" changed name to \"" + addSummoner + "\"", "Name Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }

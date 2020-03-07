@@ -102,6 +102,7 @@ namespace LoLStatsAPIv4_GUI {
             richTextBox_RedWarning.Text = WarningMessage(redTeam.Players.GetUnassignedRoles());
 
             this.ShowDialog();
+
             gameNumber = (int)numericUpDown_GameNumber.Value;
             if (ButtonPressed) {
                 var output = new Dictionary<int, PlayerList>();
@@ -159,30 +160,46 @@ namespace LoLStatsAPIv4_GUI {
             if (numericUpDown_GameNumber.Value == 0) {
                 errorList.Add("Game Number needs to be >0.");
             }
+            HashSet<string> blueSummsSet = new HashSet<string>();
+            HashSet<string> blueChampsSet = new HashSet<string>();
             foreach (Role role in BlueCBSummDict.Keys) {
                 ComboBox cbSumm = BlueCBSummDict[role];
                 ComboBox cbChamp = BlueCBChampDict[role];
                 if (string.IsNullOrWhiteSpace(MasterWrapper.GetSummonerID(cbSumm.Text))) {
-                    errorList.Add("BLUE " + role.ToString());
+                    errorList.Add("BLUE " + role.ToString() + " does not have a summoner name.");
+                }
+                else if (!blueSummsSet.Add(cbSumm.Text)) {
+                    errorList.Add("BLUE Summoner " + cbSumm.Text + " repeated.");
+                }
+                if (!blueChampsSet.Add(cbChamp.Text)) {
+                    errorList.Add("BLUE Champion " + cbChamp.Text + " repeated.");
                 }
             }
+            HashSet<string> redSummsSet = new HashSet<string>();
+            HashSet<string> redChampsSet = new HashSet<string>();
             foreach (Role role in RedCBSummDict.Keys) {
                 ComboBox cbSumm = RedCBSummDict[role];
+                ComboBox cbChamp = RedCBChampDict[role];
                 if (string.IsNullOrWhiteSpace(MasterWrapper.GetSummonerID(cbSumm.Text))) {
-                    errorList.Add("RED " + role.ToString());
+                    errorList.Add("RED " + role.ToString() + " does not have a summoner name.");
+                }
+                else if (!redSummsSet.Add(cbSumm.Text)) {
+                    errorList.Add("RED Summoner " + cbSumm.Text + " repeated.");
+                }
+                if (!redChampsSet.Add(cbChamp.Text)) {
+                    errorList.Add("RED Champion " + cbChamp.Text + " repeated.");
                 }
             }
 
             if (errorList.Count > 0) {
                 var sb = new StringBuilder();
-                sb.AppendLine("The following positions do not have summoner names in the Database:");
+                
                 foreach (string error in errorList) {
                     sb.AppendLine("- " + error);
                 }
-                sb.AppendLine("Still proceed?");
-                if (MessageBox.Show(sb.ToString(), "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.No) {
-                    return;
-                }
+                MessageBox.Show(sb.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                return;
             }
             ButtonPressed = true;
             this.Close();

@@ -85,6 +85,7 @@
             // 
             // button_UpdateRanks
             // 
+            this.button_UpdateRanks.Enabled = false;
             this.button_UpdateRanks.Location = new System.Drawing.Point(274, 176);
             this.button_UpdateRanks.Name = "button_UpdateRanks";
             this.button_UpdateRanks.Size = new System.Drawing.Size(141, 21);
